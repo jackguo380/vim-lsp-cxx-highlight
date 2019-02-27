@@ -1,6 +1,24 @@
-function! lsp_cpp_highlight#vim_lsp#start() abort
+function! lsp_cpp_highlight#vim_lsp#init() abort
     call lsp#register_notifications('lsp_cpp_highlight', 
-                \ function('lsp_cpp_highlight#receive_json_rpc'))
+                \ function('s:notification_cb'))
+endfunction
+
+function! s:notification_cb(server, data) abort
+    call lsp_cpp_highlight#receive_json_rpc(a:data)
+endfunction
+
+" User warnings
+augroup vim_lsp_check_servers
+    autocmd!
+    autocmd User lsp_server_init call s:check_servers()
+augroup END
+
+let s:checked_servers = 0
+
+function! s:check_servers() abort
+    if s:checked_servers
+        return
+    endif
 
     if s:server_available('cquery')
         let l:cquery_info = lsp#get_server_info('cquery')
@@ -26,6 +44,10 @@ function! lsp_cpp_highlight#vim_lsp#start() abort
                         \ initialization_options')
         endif
     endif
+
+    let s:checked_servers = 1
+
+    echomsg 'checked servers'
 endfunction
 
 function! s:server_available(server) abort
