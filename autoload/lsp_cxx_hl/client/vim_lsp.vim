@@ -1,10 +1,10 @@
-function! lsp_cpp_highlight#vim_lsp#init() abort
+function! lsp_cxx_hl#client#vim_lsp#init() abort
     call lsp#register_notifications('lsp_cpp_highlight', 
                 \ function('s:notification_cb'))
 endfunction
 
 function! s:notification_cb(server, data) abort
-    call lsp_cpp_highlight#receive_json_rpc(a:data)
+    call lsp_cxx_hl#receive_json_rpc(a:data)
 endfunction
 
 " User warnings
@@ -24,11 +24,18 @@ function! s:check_servers() abort
         let l:cquery_info = lsp#get_server_info('cquery')
 
         " cquery disables highlight by default
-        if !get(get(get(l:cquery_info, 'initialization_options', {})
-                    \ , 'highlight', {}), 'enabled', 0)
+        if !get(get(get(l:cquery_info, 'initialization_options', {}),
+                    \ 'highlight', {}), 'enabled', 0)
             call s:error_msg('Set highlight.enabled = true in cquery
                         \ initialization_options')
         endif
+
+        if !get(get(l:cquery_info, 'initialization_options', {}),
+                    \ 'emitInactiveRegions', 0)
+            call s:error_msg('Set emitInactiveRegions = true in cquery')
+        endif
+
+        let s:checked_servers = 1
     endif
 
     if s:server_available('ccls')
@@ -38,16 +45,14 @@ function! s:check_servers() abort
         " can be parsed
         if !get(get(get(l:ccls_info, 'initialization_options', {})
                     \ , 'highlight', {}), 'lsRanges', 0) &&
-                    \ !g:lsp_cpp_highlight_ccls_offsets
+                    \ !has('byte_offset')
             call s:error_msg('vim does not have +byte_offset,
                         \ set highlight.lsRanges = true in ccls
                         \ initialization_options')
         endif
+
+        let s:checked_servers = 1
     endif
-
-    let s:checked_servers = 1
-
-    echomsg 'checked servers'
 endfunction
 
 function! s:server_available(server) abort

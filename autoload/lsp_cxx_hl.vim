@@ -1,5 +1,5 @@
 " Receive the full JSON RPC message possibly in string form
-function! lsp_cpp_highlight#receive_json_rpc(json) abort
+function! lsp_cxx_hl#receive_json_rpc(json) abort
     if type(a:json) ==# type('')
         let l:msg = json_decode(a:json)
     else
@@ -7,7 +7,7 @@ function! lsp_cpp_highlight#receive_json_rpc(json) abort
     endif
 
     if type(l:msg) !=# type({}) || !has_key(l:msg, 'response')
-        echoerr 'Received malformed message: ' . string(l:msg)
+        call lsp_cxx_hl#log('Received malformed message: ' . string(l:msg))
         return
     endif
 
@@ -17,50 +17,49 @@ function! lsp_cpp_highlight#receive_json_rpc(json) abort
     if l:method ==? '$cquery/publishSemanticHighlighting'
         let l:server = 'cquery'
         let l:is_skipped = 0
+        let l:data_key = 'symbols'
     elseif l:method ==? '$cquery/setInactiveRegions'
         let l:server = 'cquery'
         let l:is_skipped = 1
+        let l:data_key = 'inactiveRegions'
     elseif l:method ==? '$ccls/publishSemanticHighlight'
         let l:server = 'ccls'
         let l:is_skipped = 0
+        let l:data_key = 'symbols'
     elseif l:method ==? '$ccls/publishSkippedRanges'
         let l:server = 'ccls'
         let l:is_skipped = 1
+        let l:data_key = 'skippedRanges'
     else
         " Silently ignore unwanted messages since vim-lsp
         " doesn't support subscribing to a specific type
-        echomsg 'Skipped Message: ' . l:method
+        call lsp_cxx_hl#log('Skipped Message: ' . l:method)
         return
     endif
 
-    if l:is_skipped
-        let l:data_key = (l:server ==# 'cquery') ?
-                    \ 'inactiveRegions' : 'skippedRanges'
-    else
-        let l:data_key = 'symbols'
-    endif
+    call lsp_cxx_hl#log('Received Message: ' . l:method)
 
     if !has_key(l:response, 'params') ||
                 \ !has_key(l:response['params'], l:data_key) ||
                 \ !has_key(l:response['params'], 'uri')
-        echoerr 'Response has invalid parameters: ' . string(l:response)
+        call lsp_cxx_hl#log('Response has invalid parameters: ' .
+                    \ string(l:response))
         return
     endif
 
     let l:bufnr = s:uri2bufnr(l:response['params']['uri'])
 
     if l:is_skipped
-        call lsp_cpp_highlight#receive_skipped_data(l:server,
+        call lsp_cxx_hl#receive_skipped_data(l:server,
                     \ l:bufnr, l:response['params'][l:data_key])
     else
-        call lsp_cpp_highlight#receive_symbol_data(l:server,
+        call lsp_cxx_hl#receive_symbol_data(l:server,
                     \ l:bufnr, l:response['params'][l:data_key])
     endif
 endfunction
 
 " Receive already extracted skipped region data
-function! lsp_cpp_highlight#receive_skipped_data(server, bufnr, skipped) abort
-    " It may be possible that a delayed message arrives after a buffer closed
+function! lsp_cxx_hl#receive_skipped_data(server, bufnr, skipped) abort
     if !bufexists(a:bufnr)
         echoerr 'buffer does not exist!'
         return
@@ -75,14 +74,13 @@ function! lsp_cpp_highlight#receive_skipped_data(server, bufnr, skipped) abort
         return
     endif
 
-    echom 'Got Skipped Response:'
-    echomsg string(a:skipped)
-    echom 'End of Skipped Response'
+    " No conversion done since ccls and cquery both use the same format
+    call setbufvar(a:bufnr, 'lsp_cxx_hl_skipped', a:skipped)
+    call setbufvar(a:bufnr, 'lsp_cxx_hl_need_update', 1)
 endfunction!
 
 " Receive already extracted symbol data
-function! lsp_cpp_highlight#receive_symbol_data(server, bufnr, symbols) abort
-    " It may be possible that a delayed message arrives after a buffer closed
+function! lsp_cxx_hl#receive_symbol_data(server, bufnr, symbols) abort
     if !bufexists(a:bufnr)
         echoerr 'buffer does not exist!'
         return
@@ -97,34 +95,26 @@ function! lsp_cpp_highlight#receive_symbol_data(server, bufnr, symbols) abort
         return
     endif
 
-    echomsg 'Got Response:'
-
     if a:server ==# 'cquery' || a:server ==# 'ccls'
         let l:is_ccls = (a:server ==# 'ccls')
         let l:n_symbols = s:normalize_symbols(a:symbols, l:is_ccls)
-        echomsg string(l:n_symbols)
+
+        call setbufvar(a:bufnr, 'lsp_cxx_hl_symbols', l:n_symbols)
+        call setbufvar(a:bufnr, 'lsp_cxx_hl_need_update', 1)
     else
         echoerr 'Only cquery or ccls is supported'
     endif
-
-    echom 'End of Response'
 endfunction
 
-"function! s:lsp_range_to_matchs(range) abort
-"    let l:s_line = a:range['start']['line']
-"    let l:s_char = a:range['start']['character']
-"    let l:e_line = a:range['end']['line']
-"    let l:e_char = a:range['end']['character']
-"
-"    if l:s_line == l:e_line
-"        return [[l:s_line + 1, l:s_char + 1, l:e_char - l:s_char]]
-"    endif
-"
-"    for l:line in range(l:s_line, l:e_line)
-"        
-"    endfor
-"endfunction
+" Log
+function! lsp_cxx_hl#log(...) abort
+    if len(get(g:, 'lsp_cxx_hl_log_file', '')) > 0
+        call writefile([strftime('%c') . ':' . string(a:000)],
+                    \ g:lsp_cxx_hl_log_file, 'a')
+    endif
+endfunction
 
+" Section: Helpers
 " Parse symbols and put them in a unified format
 " Note that cquery and ccls use different key names for somethings
 "                   cquery     ccls
@@ -153,10 +143,10 @@ function! s:normalize_symbols(symbols, is_ccls) abort
         let l:is_offset = 0
     endif
 
-    let l:n_symbols = {}
+    let l:n_symbols = []
 
     for l:sym in a:symbols
-        let l:id = l:sym[l:id_key]
+        let l:id = get(l:sym, l:id_key, 0)
 
         let l:kind = s:symbol_kind_str(get(l:sym, 'kind', 0))
         let l:pkind = s:symbol_kind_str(get(l:sym, 'parentKind', 0))
@@ -167,21 +157,24 @@ function! s:normalize_symbols(symbols, is_ccls) abort
             let l:storage = s:cquery_storage_str(get(l:sym, 'storage', 0))
         endif
 
-        let l:n_symbols[l:id] = {
+        let l:n_sym = {
+                    \ 'id': l:id,
                     \ 'kind': l:kind,
                     \ 'parentKind': l:pkind,
                     \ 'storage': l:storage,
                     \ }
 
         if !a:is_ccls
-            let l:n_symbols['role'] = s:cquery_role_dict(get(l:sym, 'role', 0))
+            let l:n_sym['role'] = s:cquery_role_dict(get(l:sym, 'role', 0))
         endif
 
         if l:is_offset
-            let l:n_symbols['offsets'] = l:sym['ranges']
+            let l:n_sym['offsets'] = get(l:sym, 'ranges', [])
         else
-            let l:n_symbols['ranges'] = l:sym[l:range_key]
+            let l:n_sym['ranges'] = get(l:sym, l:range_key, [])
         endif
+
+        call add(l:n_symbols, l:n_sym)
     endfor
 
     return l:n_symbols
@@ -220,8 +213,8 @@ let s:lsp_symbol_kinds = [
 
 " cquery and ccls use the same
 " extensions to LSP
-let s:cpp_symbol_kind_base = 252
-let s:cpp_symbol_kinds = [
+let s:cxx_symbol_kind_base = 252
+let s:cxx_symbol_kinds = [
             \ 'TypeAlias',
             \ 'Parameter',
             \ 'StaticMethod',
@@ -233,9 +226,9 @@ function! s:symbol_kind_str(kind) abort
         return 'Unknown'
     elseif a:kind < len(s:lsp_symbol_kinds)
         return s:lsp_symbol_kinds[a:kind]
-    elseif s:cpp_symbol_kind_base <= a:kind && 
-                \ a:kind < (s:cpp_symbol_kind_base + len(s:cpp_symbol_kinds))
-        return s:cpp_symbol_kinds[a:kind - s:cpp_symbol_kind_base]
+    elseif s:cxx_symbol_kind_base <= a:kind && 
+                \ a:kind < (s:cxx_symbol_kind_base + len(s:cxx_symbol_kinds))
+        return s:cxx_symbol_kinds[a:kind - s:cxx_symbol_kind_base]
     else
         return 'Unknown'
     endif
@@ -247,6 +240,7 @@ endfunction
 function! s:cquery_storage_str(sc) abort
     if a:sc == 0
         return 'None'
+    endif
 
     return s:ccls_storage_str(a:sc - 1)
 endfunction

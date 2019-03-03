@@ -1,1 +1,1 @@
-# vim-lsp-cpp-highlight
+# vim-lsp-cpp-hl
