@@ -1,5 +1,5 @@
 " Receive the full JSON RPC message possibly in string form
-function! lsp_cxx_hl#receive_json_rpc(json) abort
+function! lsp_cxx_hl#notify_json_rpc(json) abort
     if type(a:json) ==# type('')
         let l:msg = json_decode(a:json)
     else
@@ -50,16 +50,16 @@ function! lsp_cxx_hl#receive_json_rpc(json) abort
     let l:bufnr = s:uri2bufnr(l:response['params']['uri'])
 
     if l:is_skipped
-        call lsp_cxx_hl#receive_skipped_data(l:server,
+        call lsp_cxx_hl#notify_skipped(l:server,
                     \ l:bufnr, l:response['params'][l:data_key])
     else
-        call lsp_cxx_hl#receive_symbol_data(l:server,
+        call lsp_cxx_hl#notify_symbols(l:server,
                     \ l:bufnr, l:response['params'][l:data_key])
     endif
 endfunction
 
 " Receive already extracted skipped region data
-function! lsp_cxx_hl#receive_skipped_data(server, bufnr, skipped) abort
+function! lsp_cxx_hl#notify_skipped(server, bufnr, skipped) abort
     if !bufexists(a:bufnr)
         echoerr 'buffer does not exist!'
         return
@@ -76,11 +76,11 @@ function! lsp_cxx_hl#receive_skipped_data(server, bufnr, skipped) abort
 
     " No conversion done since ccls and cquery both use the same format
     call setbufvar(a:bufnr, 'lsp_cxx_hl_skipped', a:skipped)
-    call setbufvar(a:bufnr, 'lsp_cxx_hl_need_update', 1)
+    call setbufvar(a:bufnr, 'lsp_cxx_hl_new_skipped', 1)
 endfunction!
 
 " Receive already extracted symbol data
-function! lsp_cxx_hl#receive_symbol_data(server, bufnr, symbols) abort
+function! lsp_cxx_hl#notify_symbols(server, bufnr, symbols) abort
     if !bufexists(a:bufnr)
         echoerr 'buffer does not exist!'
         return
@@ -100,7 +100,7 @@ function! lsp_cxx_hl#receive_symbol_data(server, bufnr, symbols) abort
         let l:n_symbols = s:normalize_symbols(a:symbols, l:is_ccls)
 
         call setbufvar(a:bufnr, 'lsp_cxx_hl_symbols', l:n_symbols)
-        call setbufvar(a:bufnr, 'lsp_cxx_hl_need_update', 1)
+        call setbufvar(a:bufnr, 'lsp_cxx_hl_new_symbols', 1)
     else
         echoerr 'Only cquery or ccls is supported'
     endif
@@ -276,7 +276,9 @@ function! s:cquery_role_dict(role_int) abort
     let l:bit = 1
 
     for l:role in s:k_roles
-        let l:role_dict[l:role] = (and(a:role_int, l:bit) != 0)
+        if and(a:role_int, l:bit) != 0
+            let l:role_dict[l:role] = 1
+        endif
 
         let l:bit = l:bit * 2
     endfor
