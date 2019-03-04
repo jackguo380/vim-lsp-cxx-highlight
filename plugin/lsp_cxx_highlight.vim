@@ -32,5 +32,6 @@ command! LspCxxHighlight call lsp_cxx_hl#buffer#check(1)
 " Debug Commands
 command! LspCxxHlIgnoredSyms call lsp_cxx_hl#debug#ignored_symbols()
 command! LspCxxHlDumpSyms call lsp_cxx_hl#debug#dump_symbols()
+command! LspCxxHlCursorSym call lsp_cxx_hl#debug#cursor_symbol()
 
 runtime syntax/lsp_cxx_highlight.vim

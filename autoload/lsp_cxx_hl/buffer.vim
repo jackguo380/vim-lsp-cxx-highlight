@@ -74,7 +74,7 @@ function! s:hl_skipped() abort
 
     let l:matches = []
     for l:range in l:skipped
-        let l:match_lines = s:lsp_range_to_matches(l:range)
+        let l:match_lines = lsp_cxx_hl#buffer#lsrange2pos(l:range)
 
         let l:matches += s:matchaddpos_long('LspCxxHlSkippedRegion',
                     \ l:match_lines,
@@ -113,13 +113,13 @@ function! s:hl_symbols() abort
         let l:positions = []
 
         for l:range in get(l:sym, 'ranges', [])
-            let l:positions += s:lsp_range_to_matches(l:range)
+            let l:positions += lsp_cxx_hl#buffer#lsrange2pos(l:range)
         endfor
 
         let l:offsets = get(l:sym, 'offsets', [])
         if s:has_byte_offset
             for l:offset in l:offsets
-                let l:positions += s:offsets_to_matches(l:offset)
+                let l:positions += lsp_cxx_hl#buffer#offsets2pos(l:offset)
             endfor
         elseif !l:byte_offset_warn_done
             call lsp_cxx_hl#log('Cannot highlight, +byte_offset required')
@@ -141,7 +141,7 @@ function! s:hl_symbols() abort
         catch /E28: No such highlight group name:/
         endtry
 
-        " Try without storage type
+        " Try without storage
         try 
             let l:hl_group_retry = 'LspCxxHlSym'
                         \ . l:sym['parentKind']
@@ -213,7 +213,8 @@ function! s:matchaddpos_long(group, pos, priority) abort
     return l:matches
 endfunction
 
-function! s:lsp_range_to_matches(range) abort
+" Section: Conversion Functions
+function! lsp_cxx_hl#buffer#lsrange2pos(range) abort
     return s:range_to_matches(
                 \ a:range['start']['line'] + 1,
                 \ a:range['start']['character'] + 1,
@@ -222,17 +223,17 @@ function! s:lsp_range_to_matches(range) abort
                 \ )
 endfunction
 
-function! s:offsets_to_matches(offsets) abort
-    let l:s_byte = a:offsets['L']
-    let l:e_byte = a:offsets['R']
+function! lsp_cxx_hl#buffer#offsets2pos(offsets) abort
+    let l:s_byte = a:offsets['L'] + 1
+    let l:e_byte = a:offsets['R'] + 1
     let l:s_line = byte2line(l:s_byte)
     let l:e_line = byte2line(l:e_byte)
 
     return s:range_to_matches(
                 \ l:s_line,
-                \ l:s_byte - line2byte(l:s_line),
+                \ l:s_byte - line2byte(l:s_line) + 1,
                 \ l:e_line,
-                \ l:e_byte - line2byte(l:e_line)
+                \ l:e_byte - line2byte(l:e_line) + 1
                 \ )
 endfunction
 

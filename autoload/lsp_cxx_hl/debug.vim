@@ -31,6 +31,54 @@ function! lsp_cxx_hl#debug#ignored_symbols()
     echomsg 'End of Debug Ignored Symbols'
 endfunction
 
+function! lsp_cxx_hl#debug#cursor_symbol()
+    echomsg 'Debug Find Cursor Symbol'
+    echomsg 'Candidates:'
+    let l:line = line('.')
+    let l:col = col('.')
+
+    for l:sym in get(b:, 'lsp_cxx_hl_symbols', [])
+        let l:under_cursor = 0
+
+        let l:pos = []
+
+        for l:range in get(l:sym, 'ranges', [])
+            let l:pos += lsp_cxx_hl#buffer#lsrange2pos(l:range)
+        endfor
+
+        if has('byte_offset')
+            for l:offset in get(l:sym, 'offsets', [])
+                let l:pos += lsp_cxx_hl#buffer#offsets2pos(l:offset)
+            endfor
+        endif
+
+        for l:p in l:pos
+            if type(l:p) ==# type(0) && l:line == l:p
+                let l:under_cursor = 1
+            elseif type(l:p) ==# type([])
+                if len(l:p) == 1 && l:line == l:p[0]
+                    let l:under_cursor = 1
+                elseif len(l:p) == 2 && l:line == l:p[0] && l:col == l:p[1]
+                    let l:under_cursor = 1
+                elseif len(l:p) == 3 && l:line == l:p[0] && l:p[1] <= l:col
+                            \ && l:col <= (l:p[1] + l:p[2])
+                    let l:under_cursor = 1
+                endif
+            endif
+        endfor
+
+        if l:under_cursor
+            let l:msg = "Symbol:"
+            let l:msg .= " parentKind = " . get(l:sym, 'parentKind', '')
+            let l:msg .= " kind = " . get(l:sym, 'kind', '')
+            let l:msg .= " storage = " . get(l:sym, 'storage', '')
+            echomsg l:msg
+        endif
+    endfor
+
+    echomsg 'End of Debug Find Cursor Symbol'
+endfunction
+
 function! s:pos2str(pos) abort
     if type(a:pos) ==# type(0)
         return 'Line ' . a:pos
