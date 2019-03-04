@@ -5,12 +5,12 @@ using the language server protocol.
 
 Currently the plugin supports the following language server extensions:
 
-**[cquery](cquery-project/cquery)**
+**[cquery](www.github.com/cquery-project/cquery)**
 
 - `$cquery/publishSemanticHighlighting` - semantic highlighting
 - `$cquery/setInactiveRegions` - preprocessor skipped regions
 
-**[ccls](MaskRay/ccls)**
+**[ccls](www.github.com/MaskRay/ccls)**
  
 - `$ccls/publishSemanticHighlight` - semantic highlighting
 - `$ccls/publishSkippedRegions` - preprocessor skipped regions
@@ -19,15 +19,14 @@ Note that this plugin on its own does nothing, a language server client is requi
 
 Currently this plugin only supports:
 
-**[vim-lsp](prabirshrestha/vim-lsp)**
+**[vim-lsp](www.github.com/prabirshrestha/vim-lsp)**
 
 
 ## Install
 
-[vim-plug](junegunn/vim-plug)
+[vim-plug](www.github.com/junegunn/vim-plug)
 
-```vimscript
+```vim
 Plug 'prabirshrestha/vim-lsp'
 Plug 'jackguo380/vim-lsp-cxx-highlight'
-
 ```
