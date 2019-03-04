@@ -32,7 +32,7 @@ let s:has_timers = has('timers')
 let s:has_byte_offset = has('byte_offset')
 
 " Args: (<force> = 0)
-function! lsp_cxx_hl#buf#check(...) abort
+function! lsp_cxx_hl#buffer#check(...) abort
     if (a:0 > 0) && !a:1
         if !get(b:, 'lsp_cxx_hl_new_skipped', 0)
             return

@@ -27,7 +27,7 @@ else
     finish
 endif
 
-command! LspCxxHighlight call lsp_cxx_hl#buf#check(1)
+command! LspCxxHighlight call lsp_cxx_hl#buffer#check(1)
 
 " Debug Commands
 command! LspCxxHlIgnoredSyms call lsp_cxx_hl#debug#ignored_symbols()
