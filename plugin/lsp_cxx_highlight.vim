@@ -11,6 +11,7 @@ let g:lsp_cxx_hl_initialized = 0
 
 " Settings
 let g:lsp_cxx_hl_log_file = get(g:, 'lsp_cxx_hl_log_file', '')
+let g:lsp_cxx_hl_verbose_log = get(g:, 'lsp_cxx_hl_verbose_log', 1)
 let g:lsp_cxx_hl_inactive_region_priority = get(g:,
             \ 'lsp_cxx_hl_inactive_region_priority', -99)
 let g:lsp_cxx_hl_syntax_priority = get(g:, 'lsp_cxx_hl_syntax_priority', -100)

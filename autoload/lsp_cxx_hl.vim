@@ -1,5 +1,17 @@
+" Common entrypoint for receiving LSP notifications
+let s:has_reltime = has('reltime')
+
 " Receive the full JSON RPC message possibly in string form
 function! lsp_cxx_hl#notify_json_rpc(json) abort
+    try
+        call s:notify_json_rpc(a:json)
+    catch
+        call lsp_cxx_hl#log('notify_json_rpc error: ', v:exception, 'at',
+                    \ v:throwpoint)
+    endtry
+endfunction
+
+function! s:notify_json_rpc(json) abort
     if type(a:json) ==# type('')
         let l:msg = json_decode(a:json)
     else
@@ -7,7 +19,7 @@ function! lsp_cxx_hl#notify_json_rpc(json) abort
     endif
 
     if type(l:msg) !=# type({}) || !has_key(l:msg, 'response')
-        call lsp_cxx_hl#log('Received malformed message: ' . string(l:msg))
+        call lsp_cxx_hl#log('Received malformed message: ', l:msg)
         return
     endif
 
@@ -33,17 +45,16 @@ function! lsp_cxx_hl#notify_json_rpc(json) abort
     else
         " Silently ignore unwanted messages since vim-lsp
         " doesn't support subscribing to a specific type
-        call lsp_cxx_hl#log('Skipped Message: ' . l:method)
+        call lsp_cxx_hl#log('Skipped Message: ', l:method)
         return
     endif
 
-    call lsp_cxx_hl#log('Received Message: ' . l:method)
+    call lsp_cxx_hl#log('Received Message: ', l:method)
 
     if !has_key(l:response, 'params') ||
                 \ !has_key(l:response['params'], l:data_key) ||
                 \ !has_key(l:response['params'], 'uri')
-        call lsp_cxx_hl#log('Response has invalid parameters: ' .
-                    \ string(l:response))
+        call lsp_cxx_hl#log('Response has invalid parameters: ', l:response)
         return
     endif
 
@@ -61,15 +72,27 @@ endfunction
 " Receive already extracted skipped region data
 function! lsp_cxx_hl#notify_skipped(server, bufnr, skipped) abort
     if !bufexists(a:bufnr)
-        echoerr 'buffer does not exist!'
-        return
+        throw 'buffer does not exist!'
     endif
 
     if type(a:skipped) !=# type([])
-        echoerr 'skipped must be a list'
-        return
+        throw 'skipped must be a list'
     endif
 
+    if a:server !=# 'cquery' && a:server !=# 'ccls'
+        throw 'only cquery or ccls is supported'
+    endif
+
+    try
+        call s:notify_skipped(a:server, a:bufnr, a:skipped)
+    catch
+        call lsp_cxx_hl#log('notify_skipped error: ', v:exception, 'at',
+                    \ v:throwpoint)
+    endtry
+endfunction
+
+function! s:notify_skipped(server, bufnr, skipped) abort
+    let l:begintime = lsp_cxx_hl#profile_begin()
     if len(a:skipped) == 0
         return
     endif
@@ -77,40 +100,77 @@ function! lsp_cxx_hl#notify_skipped(server, bufnr, skipped) abort
     " No conversion done since ccls and cquery both use the same format
     call setbufvar(a:bufnr, 'lsp_cxx_hl_skipped', a:skipped)
     call setbufvar(a:bufnr, 'lsp_cxx_hl_new_skipped', 1)
+    call lsp_cxx_hl#profile_end(l:begintime,
+                \ 'notify_skipped ', bufname(a:bufnr))
 endfunction!
 
 " Receive already extracted symbol data
 function! lsp_cxx_hl#notify_symbols(server, bufnr, symbols) abort
     if !bufexists(a:bufnr)
-        echoerr 'buffer does not exist!'
-        return
+        throw 'buffer does not exist!'
     endif
 
     if type(a:symbols) !=# type([])
-        echoerr 'symbols must be a list'
-        return
+        throw 'symbols must be a list'
     endif
 
+    if a:server !=# 'cquery' && a:server !=# 'ccls'
+        throw 'only cquery or ccls is supported'
+    endif
+
+    try
+        call s:notify_symbols(a:server, a:bufnr, a:symbols)
+    catch
+        call lsp_cxx_hl#log('notify_symbols error: ', v:exception, 'at',
+                    \ v:throwpoint)
+    endtry
+endfunction
+
+function! s:notify_symbols(server, bufnr, symbols)
+    let l:begintime = lsp_cxx_hl#profile_begin()
     if len(a:symbols) == 0
         return
     endif
 
-    if a:server ==# 'cquery' || a:server ==# 'ccls'
-        let l:is_ccls = (a:server ==# 'ccls')
-        let l:n_symbols = s:normalize_symbols(a:symbols, l:is_ccls)
+    let l:is_ccls = (a:server ==# 'ccls')
+    let l:n_symbols = s:normalize_symbols(a:symbols, l:is_ccls)
 
-        call setbufvar(a:bufnr, 'lsp_cxx_hl_symbols', l:n_symbols)
-        call setbufvar(a:bufnr, 'lsp_cxx_hl_new_symbols', 1)
-    else
-        echoerr 'Only cquery or ccls is supported'
-    endif
+    call setbufvar(a:bufnr, 'lsp_cxx_hl_symbols', l:n_symbols)
+    call setbufvar(a:bufnr, 'lsp_cxx_hl_new_symbols', 1)
+    call lsp_cxx_hl#profile_end(l:begintime,
+                \ 'notify_symbols ', bufname(a:bufnr))
 endfunction
 
 " Log
+function! lsp_cxx_hl#verbose_log(...) abort
+    if get(g:, 'lsp_cxx_hl_verbose_log', 0)
+        if len(get(g:, 'lsp_cxx_hl_log_file', '')) > 0
+            call writefile([strftime('%c') . ': ' . join(a:000, '')],
+                        \ g:lsp_cxx_hl_log_file, 'a')
+        endif
+    endif
+endfunction
+
 function! lsp_cxx_hl#log(...) abort
     if len(get(g:, 'lsp_cxx_hl_log_file', '')) > 0
-        call writefile([strftime('%c') . ':' . string(a:000)],
+        call writefile([strftime('%c') . ': ' . join(a:000, '')],
                     \ g:lsp_cxx_hl_log_file, 'a')
+    endif
+endfunction
+
+function! lsp_cxx_hl#profile_begin() abort
+    if s:has_reltime
+        return reltime()
+    else
+        return 0
+    endif
+endfunction
+
+function! lsp_cxx_hl#profile_end(begin, ...) abort
+    if s:has_reltime
+        let l:name = join(a:000, '')
+        call lsp_cxx_hl#log('operation ', l:name, ' took ',
+                    \ reltimestr(reltime(a:begin)), 's to complete')
     endif
 endfunction
 

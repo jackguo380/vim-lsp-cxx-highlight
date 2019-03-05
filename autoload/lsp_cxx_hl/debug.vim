@@ -33,7 +33,7 @@ endfunction
 
 function! lsp_cxx_hl#debug#cursor_symbol()
     echomsg 'Debug Find Cursor Symbol'
-    echomsg 'Candidates:'
+    echomsg 'Found:'
     let l:line = line('.')
     let l:col = col('.')
 
@@ -70,8 +70,14 @@ function! lsp_cxx_hl#debug#cursor_symbol()
         if l:under_cursor
             let l:msg = "Symbol:"
             let l:msg .= " parentKind = " . get(l:sym, 'parentKind', '')
-            let l:msg .= " kind = " . get(l:sym, 'kind', '')
-            let l:msg .= " storage = " . get(l:sym, 'storage', '')
+            let l:msg .= ", kind = " . get(l:sym, 'kind', '')
+            let l:msg .= ", storage = " . get(l:sym, 'storage', '')
+            let l:msg .= ", resolved hl group = " .
+                        \ lsp_cxx_hl#hl_helpers#resolve_hl_group(
+                        \ get(l:sym, 'parentKind', ''),
+                        \ get(l:sym, 'kind', ''),
+                        \ get(l:sym, 'storage', '')
+                        \ )
             echomsg l:msg
         endif
     endfor

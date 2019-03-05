@@ -68,6 +68,8 @@ hi default LspCxxHlGroupEnumConstant ctermfg=Magenta guifg=#AD7FA8 cterm=none gu
 hi default LspCxxHlGroupNamespace ctermfg=Yellow guifg=#BBBB00 cterm=none gui=none
 hi default LspCxxHlGroupMemberVariable ctermfg=White guifg=White
 
+hi default link LspCxxHlSymUnknown Normal
+
 " Type
 hi default link LspCxxHlSymClass Type
 hi default link LspCxxHlSymStruct Type

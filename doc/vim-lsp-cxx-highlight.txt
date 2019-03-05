@@ -1,0 +1,10 @@
+*vim-lsp-cxx-highlight*  vim-lsp-cxx-highlight: vim lsp semantic highlighting
+
+===============================================================================
+Contents ~
+
+  1. Introduction ........................ |vim-lsp-cxx-highlight-introduction|
+  2. Install .................................. |vim-lsp-cxx-highlight-install|
+  3. Troubleshooting .................. |vim-lsp-cxx-highlight-troubleshooting|
+   1. Debug Logging ..................... |vim-lsp-cxx-highlight-debug-logging|
+   2. 
