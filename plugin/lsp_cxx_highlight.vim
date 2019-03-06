@@ -12,6 +12,8 @@ let g:lsp_cxx_hl_initialized = 0
 " Settings
 let g:lsp_cxx_hl_log_file = get(g:, 'lsp_cxx_hl_log_file', '')
 let g:lsp_cxx_hl_verbose_log = get(g:, 'lsp_cxx_hl_verbose_log', 1)
+let g:lsp_cxx_hl_ft_whitelist = get(g:, 'lsp_cxx_hl_ft_whitelist',
+            \ ['c', 'cpp', 'objc'])
 let g:lsp_cxx_hl_inactive_region_priority = get(g:,
             \ 'lsp_cxx_hl_inactive_region_priority', -99)
 let g:lsp_cxx_hl_syntax_priority = get(g:, 'lsp_cxx_hl_syntax_priority', -100)
@@ -28,11 +30,17 @@ else
     finish
 endif
 
+augroup lsp_cxx_highlight
+    autocmd!
+    autocmd VimEnter,ColorScheme * runtime syntax/lsp_cxx_highlight.vim
+    autocmd ColorScheme * call lsp_cxx_hl#buffer#check(1)
+    autocmd BufEnter,WinEnter * call lsp_cxx_hl#buffer#check(0)
+    autocmd User lsp_cxx_highlight_check call lsp_cxx_hl#buffer#check(0)
+augroup END
+
 command! LspCxxHighlight call lsp_cxx_hl#buffer#check(1)
 
 " Debug Commands
 command! LspCxxHlIgnoredSyms call lsp_cxx_hl#debug#ignored_symbols()
 command! LspCxxHlDumpSyms call lsp_cxx_hl#debug#dump_symbols()
 command! LspCxxHlCursorSym call lsp_cxx_hl#debug#cursor_symbol()
-
-runtime syntax/lsp_cxx_highlight.vim

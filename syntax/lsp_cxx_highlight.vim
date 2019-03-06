@@ -81,6 +81,7 @@ hi default link LspCxxHlSymTypeParameter Type
 hi default link LspCxxHlSymFunction Function
 hi default link LspCxxHlSymMethod Function
 hi default link LspCxxHlSymStaticMethod Function
+hi default link LspCxxHlSymConstructor Function
 
 " EnumConstant
 hi default link LspCxxHlSymEnumMember LspCxxHlGroupEnumConstant

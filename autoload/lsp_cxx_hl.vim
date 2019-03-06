@@ -102,6 +102,7 @@ function! s:notify_skipped(server, bufnr, skipped) abort
     call setbufvar(a:bufnr, 'lsp_cxx_hl_new_skipped', 1)
     call lsp_cxx_hl#profile_end(l:begintime,
                 \ 'notify_skipped ', bufname(a:bufnr))
+    doautocmd User lsp_cxx_highlight_check
 endfunction!
 
 " Receive already extracted symbol data
@@ -139,6 +140,7 @@ function! s:notify_symbols(server, bufnr, symbols)
     call setbufvar(a:bufnr, 'lsp_cxx_hl_new_symbols', 1)
     call lsp_cxx_hl#profile_end(l:begintime,
                 \ 'notify_symbols ', bufname(a:bufnr))
+    doautocmd User lsp_cxx_highlight_check
 endfunction
 
 " Log
@@ -351,10 +353,4 @@ function! s:uri2bufnr(uri) abort
     " Remove the leading file:// or whatever protocol is used
     let l:filename = substitute(a:uri, '\c[a-z]\+://', '', '')
     return bufnr(l:filename)
-endfunction
-
-function! s:error_msg(msg) abort
-    echohl ErrorMsg
-    echomsg a:msg
-    echohl NONE
 endfunction
