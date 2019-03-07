@@ -105,12 +105,12 @@ function! s:clear_skipped() abort
     unlet! w:lsp_cxx_hl_skipped_matches
     unlet! w:lsp_cxx_hl_skipped_bufnr
 
-    try
-        for l:match in l:matches
+    for l:match in l:matches
+        try
             call matchdelete(l:match)
-        endfor
-    catch /E803: ID not found:/
-    endtry
+        catch /E803: ID not found:/
+        endtry
+    endfor
     redraw
 endfunction
 
@@ -181,12 +181,12 @@ function! s:clear_symbols() abort
     unlet! w:lsp_cxx_hl_symbols_matches
     unlet! w:lsp_cxx_hl_symbols_bufnr
 
-    try
-        for l:match in l:matches
+    for l:match in l:matches
+        try
             call matchdelete(l:match)
-        endfor
-    catch /E803: ID not found:/
-    endtry
+        catch /E803: ID not found:/
+        endtry
+    endfor
     redraw
 endfunction
 
