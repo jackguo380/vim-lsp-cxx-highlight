@@ -10,8 +10,14 @@
 
 
 " Preprocessor Skipped Regions:
+"
 " This is used for false branches of #if or other preprocessor conditions
 hi default link LspCxxHlSkippedRegion Comment
+
+" This is the first and last line of the preprocessor regions
+" in most cases this contains the #if/#else/#endif statements
+" so it is better to let syntax do the highlighting.
+hi default link LspCxxHlSkippedRegionBeginEnd Normal
 
 
 " Syntax Highlighting:

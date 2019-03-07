@@ -70,21 +70,11 @@ function! s:notify_json_rpc(json) abort
 endfunction
 
 " Receive already extracted skipped region data
-function! lsp_cxx_hl#notify_skipped(server, bufnr, skipped) abort
-    if !bufexists(a:bufnr)
-        throw 'buffer does not exist!'
-    endif
-
-    if type(a:skipped) !=# type([])
-        throw 'skipped must be a list'
-    endif
-
-    if a:server !=# 'cquery' && a:server !=# 'ccls'
-        throw 'only cquery or ccls is supported'
-    endif
+function! lsp_cxx_hl#notify_skipped(server, buffer, skipped) abort
+    let l:bufnr = s:common_notify_checks(a:server, a:buffer, a:symbols)
 
     try
-        call s:notify_skipped(a:server, a:bufnr, a:skipped)
+        call s:notify_skipped(a:server, l:bufnr, a:skipped)
     catch
         call lsp_cxx_hl#log('notify_skipped error: ', v:exception, 'at',
                     \ v:throwpoint)
@@ -103,21 +93,11 @@ function! s:notify_skipped(server, bufnr, skipped) abort
 endfunction!
 
 " Receive already extracted symbol data
-function! lsp_cxx_hl#notify_symbols(server, bufnr, symbols) abort
-    if !bufexists(a:bufnr)
-        throw 'buffer does not exist!'
-    endif
-
-    if type(a:symbols) !=# type([])
-        throw 'symbols must be a list'
-    endif
-
-    if a:server !=# 'cquery' && a:server !=# 'ccls'
-        throw 'only cquery or ccls is supported'
-    endif
+function! lsp_cxx_hl#notify_symbols(server, buffer, symbols) abort
+    let l:bufnr = s:common_notify_checks(a:server, a:buffer, a:symbols)
 
     try
-        call s:notify_symbols(a:server, a:bufnr, a:symbols)
+        call s:notify_symbols(a:server, l:bufnr, a:symbols)
     catch
         call lsp_cxx_hl#log('notify_symbols error: ', v:exception, 'at',
                     \ v:throwpoint)
@@ -171,6 +151,31 @@ function! lsp_cxx_hl#profile_end(begin, ...) abort
 endfunction
 
 " Section: Helpers
+
+function! s:common_notify_checks(server, buffer, symbols) abort
+    if type(a:buffer) ==# type("")
+        let l:bufnr = s:uri2bufnr(a:buffer)
+    elseif type(a:buffer) ==# type(0)
+        let l:bufnr = a:buffer
+    else
+        throw 'buffer must be a string or number'
+    endif
+
+    if !bufexists(l:bufnr)
+        throw 'buffer does not exist!'
+    endif
+
+    if type(a:symbols) !=# type([])
+        throw 'symbols must be a list'
+    endif
+
+    if a:server !=# 'cquery' && a:server !=# 'ccls'
+        throw 'only cquery or ccls is supported'
+    endif
+
+    return l:bufnr
+endfunction
+
 " Parse symbols and put them in a unified format
 " Note that cquery and ccls use different key names for somethings
 "                   cquery     ccls
@@ -346,5 +351,37 @@ endfunction
 function! s:uri2bufnr(uri) abort
     " Remove the leading file:// or whatever protocol is used
     let l:filename = substitute(a:uri, '\c[a-z]\+://', '', '')
-    return bufnr(l:filename)
+    let l:bufnr = bufnr(l:filename)
+
+    if l:bufnr == -1
+        " Some characters get escaped by ccls into url encoded format.
+        " Only try this if received filename doesn't exist.
+        let l:bufnr = bufnr(s:unescape_urlencode(l:filename))
+    endif
+
+    return l:bufnr
 endfunction
+
+" A simple url format decoder
+function! s:unescape_urlencode(str) abort
+    let l:matches = []
+    let l:start = 0
+
+    while l:start != -1
+        let l:match = matchstrpos(a:str, '%[0-9A-Fa-f][0-9A-Fa-f]', l:start)
+        let l:start = l:match[2]
+
+        if l:start != -1
+            call add(l:matches, l:match)
+        endif
+    endwhile
+
+    let l:str = a:str
+    for l:match in l:matches
+        let l:str = l:str[:l:match[1] - 1] . nr2char(str2nr(l:match[0][1:], 16)) .
+                    \ l:str[l:match[2]:]
+    endfor
+
+    call lsp_cxx_hl#verbose_log('unescape_urlencode unescaped filename: ', l:str)
+    return l:str
+endfunction!

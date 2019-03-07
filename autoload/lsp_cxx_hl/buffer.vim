@@ -58,6 +58,7 @@ let s:has_byte_offset = has('byte_offset')
 function! lsp_cxx_hl#buffer#check(...) abort
     let l:force = (a:0 > 0 && a:1)
     let l:bufnr = winbufnr(0)
+    let l:ft_ok = count(g:lsp_cxx_hl_ft_whitelist, &filetype) > 0
 
     call lsp_cxx_hl#verbose_log('buffer#check ', l:force ? '(force) ' : '',
                 \ 'started for ', bufname(l:bufnr))
@@ -94,55 +95,59 @@ function! s:dispatch_hl_skipped(force) abort
         endif
 
         let g:lsp_cxx_hl_skipped_timer = timer_start(10,
-                    \ function('s:hl_skipped', [a:force, winbufnr(0)]))
+                    \ function('s:hl_skipped_wrap', [a:force, winbufnr(0)]))
     else
-        call s:hl_skipped(0)
+        call s:hl_skipped_wrap(a:force, winbufnr(0), 0)
     endif
 endfunction
 
-function! s:clear_skipped() abort
+function! s:hl_skipped_wrap(force, bufnr, timer) abort
+    let l:begintime = lsp_cxx_hl#profile_begin()
+
     let l:matches = get(w:, 'lsp_cxx_hl_skipped_matches', [])
     unlet! w:lsp_cxx_hl_skipped_matches
     unlet! w:lsp_cxx_hl_skipped_bufnr
 
-    for l:match in l:matches
-        try
-            call matchdelete(l:match)
-        catch /E803: ID not found:/
-        endtry
-    endfor
+    let l:bufnr = winbufnr(0)
+
+    call s:hl_skipped(a:force, l:bufnr, a:timer)
+
+    " Clear old highlighting after finishing highlighting
+    call s:clear_matches(l:matches)
+
     redraw
+
+    unlet! g:lsp_cxx_hl_skipped_timer
+    call lsp_cxx_hl#profile_end(l:begintime, 'hl_skipped ', bufname(l:bufnr))
 endfunction
 
 function! s:hl_skipped(force, bufnr, timer) abort
-    let l:begintime = lsp_cxx_hl#profile_begin()
-    let l:bufnr = winbufnr(0)
-
-    if l:bufnr != a:bufnr
-        " Buffers changed before the timer triggered
-        unlet! g:lsp_cxx_hl_skipped_timer
-        return
-    endif
-
-    call s:clear_skipped()
-
-    if !exists('b:lsp_cxx_hl_skipped')
-        " No data yet
-        unlet! g:lsp_cxx_hl_skipped_timer
-        return
-    endif
-
+    " Bad filetype
     if !a:force && count(g:lsp_cxx_hl_ft_whitelist, &filetype) == 0
-        " Bad filetype
-        unlet! g:lsp_cxx_hl_skipped_timer
+        return
+    endif
+
+    " No data yet
+    if !exists('b:lsp_cxx_hl_skipped')
         return
     endif
 
     let l:skipped = b:lsp_cxx_hl_skipped
 
+    let l:begin_end_pos = []
     let l:positions = []
     for l:range in l:skipped
-        let l:positions += lsp_cxx_hl#buffer#lsrange2pos(l:range)
+        let l:cur_positions = lsp_cxx_hl#buffer#lsrange2pos(l:range)
+
+        if len(l:cur_positions) >= 1
+            call add(l:begin_end_pos, l:cur_positions[0])
+        endif
+
+        if len(l:cur_positions) >= 2
+            call add(l:begin_end_pos, l:cur_positions[-1])
+            let l:positions += l:cur_positions[1:-2]
+        endif
+
     endfor
 
     let l:matches = lsp_cxx_hl#hl_helpers#matchaddpos_long(
@@ -150,16 +155,18 @@ function! s:hl_skipped(force, bufnr, timer) abort
                 \ l:positions,
                 \ g:lsp_cxx_hl_inactive_region_priority)
 
+    let l:matches += lsp_cxx_hl#hl_helpers#matchaddpos_long(
+                \ 'LspCxxHlSkippedRegionBeginEnd',
+                \ l:begin_end_pos,
+                \ g:lsp_cxx_hl_inactive_region_priority)
+
+
     let w:lsp_cxx_hl_skipped_matches = l:matches
-    let w:lsp_cxx_hl_skipped_bufnr = l:bufnr
-    redraw
+    let w:lsp_cxx_hl_skipped_bufnr = a:bufnr
 
     call lsp_cxx_hl#log('hl_skipped highlighted ', len(l:skipped),
                 \ ' skipped preprocessor regions',
-                \ ' in file ', bufname(l:bufnr))
-    call lsp_cxx_hl#profile_end(l:begintime, 'hl_skipped ', bufname(l:bufnr))
-
-    unlet! g:lsp_cxx_hl_skipped_timer
+                \ ' in file ', bufname(a:bufnr))
 endfunction
 
 function! s:dispatch_hl_symbols(force) abort
@@ -170,52 +177,45 @@ function! s:dispatch_hl_symbols(force) abort
         endif
 
         let g:lsp_cxx_hl_symbols_timer = timer_start(10,
-                    \ function('s:hl_symbols', [a:force, winbufnr(0)]))
+                    \ function('s:hl_symbols_wrap', [a:force, winbufnr(0)]))
     else
-        call s:hl_symbols(0)
+        call s:hl_symbols_wrap(a:force, winbufnr(0), 0)
     endif
 endfunction
 
-function! s:clear_symbols() abort
+function! s:hl_symbols_wrap(force, bufnr, timer) abort
+    let l:begintime = lsp_cxx_hl#profile_begin()
+
     let l:matches = get(w:, 'lsp_cxx_hl_symbols_matches', [])
     unlet! w:lsp_cxx_hl_symbols_matches
     unlet! w:lsp_cxx_hl_symbols_bufnr
 
-    for l:match in l:matches
-        try
-            call matchdelete(l:match)
-        catch /E803: ID not found:/
-        endtry
-    endfor
-    redraw
+    let l:bufnr = winbufnr(0)
+
+    call s:hl_symbols(a:force, l:bufnr, a:timer)
+
+    " Clear old highlighting after finishing highlighting
+    call s:clear_matches(l:matches)
+
+    unlet! g:lsp_cxx_hl_symbols_timer
+
+    call lsp_cxx_hl#profile_end(l:begintime, 'hl_symbols ', bufname(l:bufnr))
 endfunction
 
 function! s:hl_symbols(force, bufnr, timer) abort
-    let l:begintime = lsp_cxx_hl#profile_begin()
-    let l:bufnr = winbufnr(0)
-
-    if l:bufnr != a:bufnr
-        " Buffers changed before the timer triggered
-        unlet! g:lsp_cxx_hl_symbols_timer
-        return
-    endif
-
-    call s:clear_symbols()
-
-    if !exists('b:lsp_cxx_hl_symbols')
-        " No data yet
-        unlet! g:lsp_cxx_hl_symbols_timer
-        return
-    endif
-
+    " Bad filetype
     if !a:force && count(g:lsp_cxx_hl_ft_whitelist, &filetype) == 0
-        " Bad filetype
-        unlet! g:lsp_cxx_hl_symbols_timer
+        return
+    endif
+
+    " No data yet
+    if !exists('b:lsp_cxx_hl_symbols')
         return
     endif
 
     let l:symbols = b:lsp_cxx_hl_symbols
 
+    " Check for cached positions, ignore if forced highlighting
     if a:force || !exists('b:lsp_cxx_hl_symbols_positions')
         let [l:hl_group_positions, l:missing_groups] =
                     \ s:hl_symbols_to_positions(l:symbols)
@@ -236,15 +236,11 @@ function! s:hl_symbols(force, bufnr, timer) abort
     endfor
 
     let w:lsp_cxx_hl_symbols_matches = l:matches
-    let w:lsp_cxx_hl_symbols_bufnr = l:bufnr
+    let w:lsp_cxx_hl_symbols_bufnr = a:bufnr
     redraw
 
     call lsp_cxx_hl#log('hl_symbols highlighted ', l:cached ? '(cached) ' : '',
-                \ len(l:symbols), ' symbols in file ', bufname(l:bufnr))
-
-    call lsp_cxx_hl#profile_end(l:begintime, 'hl_symbols ', bufname(l:bufnr))
-
-    unlet! g:lsp_cxx_hl_symbols_timer
+                \ len(l:symbols), ' symbols in file ', bufname(a:bufnr))
 endfunction
 
 function! s:hl_symbols_to_positions(symbols) abort
@@ -332,6 +328,14 @@ endfunction
 
 
 " Section: Helpers
+function! s:clear_matches(matches) abort
+    for l:match in a:matches
+        try
+            call matchdelete(l:match)
+        catch /E803: ID not found:/
+        endtry
+    endfor
+endfunction
 
 " Section: Conversion Functions
 function! lsp_cxx_hl#buffer#lsrange2pos(range) abort
