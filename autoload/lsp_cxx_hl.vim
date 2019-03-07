@@ -93,9 +93,6 @@ endfunction
 
 function! s:notify_skipped(server, bufnr, skipped) abort
     let l:begintime = lsp_cxx_hl#profile_begin()
-    if len(a:skipped) == 0
-        return
-    endif
 
     " No conversion done since ccls and cquery both use the same format
     call setbufvar(a:bufnr, 'lsp_cxx_hl_skipped', a:skipped)
@@ -129,9 +126,6 @@ endfunction
 
 function! s:notify_symbols(server, bufnr, symbols)
     let l:begintime = lsp_cxx_hl#profile_begin()
-    if len(a:symbols) == 0
-        return
-    endif
 
     let l:is_ccls = (a:server ==# 'ccls')
     let l:n_symbols = s:normalize_symbols(a:symbols, l:is_ccls)

@@ -62,10 +62,6 @@ function! lsp_cxx_hl#buffer#check(...) abort
     call lsp_cxx_hl#verbose_log('buffer#check ', l:force ? '(force) ' : '',
                 \ 'started for ', bufname(l:bufnr))
 
-    if !l:force && count(g:lsp_cxx_hl_ft_whitelist, &filetype) == 0
-        return
-    endif
-
     " preprocessor skipped
     if l:force || !exists('w:lsp_cxx_hl_skipped_matches') ||
                 \ get(b:, 'lsp_cxx_hl_new_skipped', 0) ||
@@ -115,6 +111,7 @@ function! s:clear_skipped() abort
         endfor
     catch /E803: ID not found:/
     endtry
+    redraw
 endfunction
 
 function! s:hl_skipped(force, bufnr, timer) abort
@@ -135,6 +132,12 @@ function! s:hl_skipped(force, bufnr, timer) abort
         return
     endif
 
+    if !a:force && count(g:lsp_cxx_hl_ft_whitelist, &filetype) == 0
+        " Bad filetype
+        unlet! g:lsp_cxx_hl_skipped_timer
+        return
+    endif
+
     let l:skipped = b:lsp_cxx_hl_skipped
 
     let l:positions = []
@@ -149,6 +152,7 @@ function! s:hl_skipped(force, bufnr, timer) abort
 
     let w:lsp_cxx_hl_skipped_matches = l:matches
     let w:lsp_cxx_hl_skipped_bufnr = l:bufnr
+    redraw
 
     call lsp_cxx_hl#log('hl_skipped highlighted ', len(l:skipped),
                 \ ' skipped preprocessor regions',
@@ -183,6 +187,7 @@ function! s:clear_symbols() abort
         endfor
     catch /E803: ID not found:/
     endtry
+    redraw
 endfunction
 
 function! s:hl_symbols(force, bufnr, timer) abort
@@ -199,6 +204,12 @@ function! s:hl_symbols(force, bufnr, timer) abort
 
     if !exists('b:lsp_cxx_hl_symbols')
         " No data yet
+        unlet! g:lsp_cxx_hl_symbols_timer
+        return
+    endif
+
+    if !a:force && count(g:lsp_cxx_hl_ft_whitelist, &filetype) == 0
+        " Bad filetype
         unlet! g:lsp_cxx_hl_symbols_timer
         return
     endif
@@ -226,6 +237,7 @@ function! s:hl_symbols(force, bufnr, timer) abort
 
     let w:lsp_cxx_hl_symbols_matches = l:matches
     let w:lsp_cxx_hl_symbols_bufnr = l:bufnr
+    redraw
 
     call lsp_cxx_hl#log('hl_symbols highlighted ', l:cached ? '(cached) ' : '',
                 \ len(l:symbols), ' symbols in file ', bufname(l:bufnr))
