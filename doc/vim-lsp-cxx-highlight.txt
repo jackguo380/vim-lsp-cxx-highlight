@@ -4,7 +4,22 @@
 Contents ~
 
   1. Introduction ........................ |vim-lsp-cxx-highlight-introduction|
-  2. Install .................................. |vim-lsp-cxx-highlight-install|
+  2. Usage and Configuration .. |vim-lsp-cxx-highlight-usage-and-configuration|
+   1. Commands ............................... |vim-lsp-cxx-highlight-commands|
+   2. Variables .............................. |vim-lsp-cxx-highlight-commands|
+   3. Highlight Groups ............... |vim-lsp-cxx-highlight-highlight-groups|
   3. Troubleshooting .................. |vim-lsp-cxx-highlight-troubleshooting|
    1. Debug Logging ..................... |vim-lsp-cxx-highlight-debug-logging|
-   2. 
+   2. Debug Commands ................... |vim-lsp-cxx-highlight-debug-commands|
+  4. Extending ....................... ||
+
+
+===============================================================================
+
+                                           *vim-lsp-cxx-highlight-introduction*
+Introduction ~
+
+vim-lsp-cxx-highlight is a vim plugin that provides C/C++/ObjC semantic 
+highlighting using the language server protocol.
+
+
