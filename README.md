@@ -5,19 +5,17 @@ using the language server protocol.
 
 ## Introduction
 
-**Motivation**
-
-So why another semantic highlighting plugin when 
+How does this plugin differentiate itself from
 [color_coded](https://github.com/jeaye/color_coded) and
-[chromatica](https://github.com/arakashic/chromatica.nvim) exist? 
+[chromatica](https://github.com/arakashic/chromatica.nvim)?
 
-The idea for this plugin came from seeing [vscode-cquery](https://github.com/cquery-project/vscode-cquery)
-and seeing how cquery/ccls can provide semantic highlighting data.
+vim-lsp-cxx-highlight does no compilation/analysis of source files. It receives all 
+of its semantic highlighting data over the language server protocol.
+The main advantage of this plugin is that it is written entirely in vimscript.
 
-Some advantages of this plugin would be:
-- Reuse cquery/ccls highlight data, no need to re-analyze the source file wasting CPU cycles.
-- No external dependencies (other than the language server) such as python or vim compiled with `+lua`.
-- cquery/ccls sanitizes libclang's AST data leading to more consistent highlighting.
+The idea for this came from [vscode-cquery](https://github.com/cquery-project/vscode-cquery)
+and seeing how it uses cquery to provide semantic highlighting.
+
 
 ## Requirements
 

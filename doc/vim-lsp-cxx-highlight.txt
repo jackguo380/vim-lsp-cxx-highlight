@@ -6,12 +6,15 @@ Contents ~
   1. Introduction ........................ |vim-lsp-cxx-highlight-introduction|
   2. Usage and Configuration .. |vim-lsp-cxx-highlight-usage-and-configuration|
    1. Commands ............................... |vim-lsp-cxx-highlight-commands|
-   2. Variables .............................. |vim-lsp-cxx-highlight-commands|
+   2. Variables ............................. |vim-lsp-cxx-highlight-variables|
    3. Highlight Groups ............... |vim-lsp-cxx-highlight-highlight-groups|
   3. Troubleshooting .................. |vim-lsp-cxx-highlight-troubleshooting|
-   1. Debug Logging ..................... |vim-lsp-cxx-highlight-debug-logging|
-   2. Debug Commands ................... |vim-lsp-cxx-highlight-debug-commands|
-  4. Extending ....................... ||
+  4. Adding support for more LSP clients .... |vim-lsp-cxx-highlight-extending|
+  5. Public API ................................... |vim-lsp-cxx-highlight-api|
+   a. |g:lsp_cxx_hl_loaded| ..................................................
+   b. |lsp_cxx_hl#notify_json_rpc| ...........................................
+   c. |lsp_cxx_hl#notify_skipped| ............................................
+   d. |lsp_cxx_hl#notify_symbols| ............................................
 
 
 ===============================================================================
@@ -22,4 +25,286 @@ Introduction ~
 vim-lsp-cxx-highlight is a vim plugin that provides C/C++/ObjC semantic 
 highlighting using the language server protocol.
 
+Language Server Protocol: https://www.langserver.org
 
+cquery: https://github.com/cquery-project/cquery
+
+ccls: https://github.com/MaskRay/ccls
+
+===============================================================================
+
+                                *vim-lsp-cxx-highlight-usage-and-configuration*
+Usage ~
+
+For information on how to get this plugin working with cquery/ccls see the
+README.md file at the root of this plugin's directory. It can also be viewed
+at github: https://github.com/jackguo380/vim-lsp-cxx-highlight
+
+===============================================================================
+
+                                               *vim-lsp-cxx-highlight-commands*
+Commands ~
+
+vim-lsp-cxx-highlight adds the following commands:
+
+-------------------------------------------------------------------------------
+
+                                                              *LspCxxHighlight*
+:LspCxxHighlight
+
+Redo highlighting for the current buffer. This only reapplies highlighting
+using the locally cached data. There is currently no way to force the language
+server to resend highlighting data.
+
+This command can be used after modifying a highlight group to see the changes.
+
+If you have to manually call this command because your buffer is not
+highlighted or has stale highlight consider filing a issue on github.
+
+-------------------------------------------------------------------------------
+
+                                                          *LspCxxHlIgnoredSyms*
+:LspCxxHlIgnoredSyms
+
+Show all symbols that don't have a highlight group defined for the current
+buffer. This is useful for debugging why a symbol is not highlighted.
+
+-------------------------------------------------------------------------------
+
+                                                             *LspCxxHlDumpSyms*
+:LspCxxHlDumpSyms
+
+Show all symbols in the current buffer received from the language server.
+Warning: this spams your messages.
+
+-------------------------------------------------------------------------------
+
+                                                            *LspCxxHlCursorSym*
+:LspCxxHlCursorSym
+
+Show the symbol under the cursor (if one exists) and what highlight group it
+corresponds to. Occasionally multiple symbols are under the cursor, if this
+happens often it may be due to a bug in your language server.
+
+===============================================================================
+
+                                              *vim-lsp-cxx-highlight-variables*
+Variables
+
+The following variables can be modified to change the behavior of this plugin:
+
+-------------------------------------------------------------------------------
+
+                                  *lsp_cxx_hl_log_file* *g:lsp_cxx_hl_log_file*
+g:lsp_cxx_hl_log_file
+
+The log file for vim-lsp-cxx-highlight. By default it is '', which is disabled.
+
+>
+  let g:lsp_cxx_hl_log_file = '/tmp/vim-lsp-cxx-hl.log'
+<
+
+-------------------------------------------------------------------------------
+
+                            *lsp_cxx_hl_verbose_log* *g:lsp_cxx_hl_verbose_log*
+g:lsp_cxx_hl_verbose_log
+
+Extra verbose logging. By default it is 0 (off).
+
+>
+  let g:lsp_cxx_hl_verbose_log = 1
+<
+
+-------------------------------------------------------------------------------
+
+                          *lsp_cxx_hl_ft_whitelist* *g:lsp_cxx_hl_ft_whitelist*
+g:lsp_cxx_hl_ft_whitelist
+
+Whitelist of filetypes to highlight.
+
+Default = ['c', 'cpp', 'objc', 'objcpp', 'cc']
+
+>
+  let g:lsp_cxx_hl_ft_whitelist = ['c', 'cpp']
+  let g:lsp_cxx_hl_ft_whitelist += ['abcd']
+<
+
+-------------------------------------------------------------------------------
+
+  *lsp_cxx_hl_inactive_region_priority* *g:lsp_cxx_hl_inactive_region_priority*
+g:lsp_cxx_hl_inactive_region_priority
+
+The match priority of preprocessor skipped regions. Also see |matchadd()|.
+This is very low to avoid the regions from overwriting other matches.
+
+Default = -99.
+>
+  let g:lsp_cxx_hl_inactive_region_priority = -10
+<
+
+-------------------------------------------------------------------------------
+
+                    *lsp_cxx_hl_syntax_priority* *g:lsp_cxx_hl_syntax_priority*
+g:lsp_cxx_hl_syntax_priority
+
+The match priority of general semantic highlight. Also see |matchadd()|.
+This is very low to avoid the highlighting from overwriting other matches.
+
+Default = -100.
+>
+  let g:lsp_cxx_hl_syntax_priority = -20
+<
+
+===============================================================================
+
+                                        *vim-lsp-cxx-highlight-troubleshooting*
+Troubleshooting
+
+If you are experiencing issues getting highlighting to work at all then enable
+logging and seeing if any log messages (or lack of messages) stand out.
+
+>
+  let g:lsp_cxx_hl_log_file = '/tmp/vim-lsp-cxx-hl.log'
+  let g:lsp_cxx_hl_verbose_log = 1
+<
+
+If certain symbols don't look correct try |LspCxxHlCursorSym| or
+|LspCxxHlIgnoredSyms| and looking at the output.
+
+Otherwise you can seek support on github:
+https://github.com/jackguo380/vim-lsp-cxx-highlight/issues
+(Please clearly document what your configuration is and what you tried)
+
+===============================================================================
+
+                                              *vim-lsp-cxx-highlight-extending*
+Adding support for more LSP clients
+
+vim-lsp-cxx-highlight is designed to be simple to integrate with a LSP client.
+
+In order to support vim-lsp-cxx-highlight with your LSP client there are a
+couple of options.
+
+1. Receive all LSP notifications and call |lsp_cxx_hl#notify_json_rpc()|
+   
+   This is how |vim-lsp| support is implemented.
+
+Example pseudo code:
+>
+  function OnReceiveMessage(jsonstr)
+    if IsResponse(jsonstr)
+      " ...
+    elseif IsNotification(jsonstr)
+      call lsp_cxx_hl#notify_json_rpc(jsonstr)
+    else
+      " ...
+    endif
+  endfunction
+<
+
+2. Parse the LSP notifications and call the corresponding function.
+
+   $cquery/publishSemanticHighlighting -> |lsp_cxx_hl#notify_symbols()|
+   $cquery/setInactiveRegions          -> |lsp_cxx_hl#notify_skipped()|
+   $ccls/publishSemanticHighlight      -> |lsp_cxx_hl#notify_symbols()|
+   $ccls/publishSkippedRegions         -> |lsp_cxx_hl#notify_skipped()|
+
+Example pseudo code:
+>
+  function OnReceiveNotification(msg)
+    if msg['method'] ==# '$cquery/publishSemanticHighlighting'
+      call lsp_cxx_hl#notify_symbols('cquery',
+          \ msg['params']['uri'], msg['params']['symbols'])
+    elseif " ...
+      " ...
+    endif
+  endfunction
+<
+
+===============================================================================
+
+                                                    *vim-lsp-cxx-highlight-api*
+Public API
+
+vim-lsp-cxx-highlight plugin provides the following API for other plugins:
+
+-------------------------------------------------------------------------------
+
+                                                          *g:lsp_cxx_hl_loaded*
+g:lsp_cxx_hl_loaded
+
+The existence of this plugin can be checked like so:
+>
+  if exists('g:lsp_cxx_hl_loaded')
+    " Do something
+  endif
+<
+
+-------------------------------------------------------------------------------
+
+                    *lsp_cxx_hl#notify_json_rpc* *lsp_cxx_hl#notify_json_rpc()*
+lsp_cxx_hl#notify_json_rpc()
+
+Pass vim-lsp-cxx-highlight the full JSON RPC Notification.
+
+This will call |lsp_cxx_hl#notify_skipped()| or |lsp_cxx_hl#notify_symbols()|
+depending on the method/type of the message.
+Unrelated messages are ignored without error.
+
+>
+  function lsp_cxx_hl#notify_json_rpc(json)
+<
+    json - |String| (JSON String) or |Dict| (Parsed by |json_decode()|).
+
+-------------------------------------------------------------------------------
+
+                      *lsp_cxx_hl#notify_skipped* *lsp_cxx_hl#notify_skipped()*
+lsp_cxx_hl#notify_skipped()
+
+Receive data from $cquery/setInactiveRegions or $ccls/publishSkippedRegions.
+This parses the preprocessor skipped regions and sends it to be highlighted.
+
+>
+  function lsp_cxx_hl#notify_skipped(server, buffer, skipped)
+<
+    server  - |String|, either 'cquery' or 'ccls'
+    buffer  - |String| (Raw URI or |bufname()|) or |Number| (|bufnr()|), which
+              buffer the data is intended for.
+    skipped - |List|, the inactive regions data
+
+These arguments can be found in the LSP notification like so:
+buffer = msg['response']['params']['uri']
+
+skipped = msg['params']['inactiveRegions'] (cquery)
+or
+skipped = msg['params']['skippedRanges'] (ccls)
+
+-------------------------------------------------------------------------------
+
+                      *lsp_cxx_hl#notify_symbols* *lsp_cxx_hl#notify_symbols()*
+lsp_cxx_hl#notify_symbols()
+
+Receive data from $cquery/publishSemanticHighlighting or $ccls/publishSemanticHighlight.
+This parses the semantic highlight symbols and sends it to be highlighted.
+
+>
+  function lsp_cxx_hl#notify_symbols(server, buffer, symbols)
+<
+    server  - |String|, either 'cquery' or 'ccls'
+    buffer  - |String| (Raw URI or |bufname()|) or |Number| (|bufnr()|), which
+              buffer the data is intended for.
+    symbols - |List|, the list of semantic highlighting symbols
+
+These arguments can be found in the LSP notification like so:
+buffer = msg['params']['uri']
+symbols = msg['params']['symbols']
+
+===============================================================================
+
+License: MIT
+
+See LICENSE.txt at the root of this plugin.
+
+===============================================================================
+
+vim: ft=help
