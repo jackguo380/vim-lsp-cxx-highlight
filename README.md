@@ -16,12 +16,12 @@ The main advantage of this plugin is that it is written entirely in vimscript.
 The idea for this came from [vscode-cquery](https://github.com/cquery-project/vscode-cquery)
 and seeing how it uses cquery to provide semantic highlighting.
 
-**Images**
+Left: No Plugin, Right: vim-lsp-cxx-highlight + cquery
 
-Left: No Plugin, Right: vim-lsp-cxx-highlight + ccls
-
-![alt text](images/none.png "No Highlight Plugin")
-![alt text](images/vim_lsp_cxx_hl.png "No Highlight Plugin")
+<span>
+<img src="images/none.png" width="440"/>
+<img src="images/vim_lsp_cxx_hl.png" width="440"/>
+</span>
 
 ## Requirements
 
@@ -33,12 +33,10 @@ Additionally a compatible language server and language server client is required
 The following language servers and protocol extensions are supported:
 
 - **[cquery](https://www.github.com/cquery-project/cquery)**
-
  - `$cquery/publishSemanticHighlighting` - semantic highlighting
  - `$cquery/setInactiveRegions` - preprocessor skipped regions
 
 - **[ccls](https://www.github.com/MaskRay/ccls)**
- 
  - `$ccls/publishSemanticHighlight` - semantic highlighting
  - `$ccls/publishSkippedRegions` - preprocessor skipped regions
 
