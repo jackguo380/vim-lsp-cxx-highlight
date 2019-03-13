@@ -67,7 +67,7 @@ For `ccls` if your `vim` does _not_ have `+byte_offset` this initializationOptio
 }
 ```
 
-For a sample vim-lsp configuration see [this](sample-vimrcs/vim-lsp-register.vimrc)
+For a sample vim-lsp configuration see [this](sample-vimrcs/vim-lsp-register.vim)
 
 ## Configuration
 
