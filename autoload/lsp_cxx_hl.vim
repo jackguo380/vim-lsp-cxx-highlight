@@ -18,13 +18,12 @@ function! s:notify_json_rpc(json) abort
         let l:msg = a:json
     endif
 
-    if type(l:msg) !=# type({}) || !has_key(l:msg, 'response')
+    if type(l:msg) !=# type({})
         call lsp_cxx_hl#log('Received malformed message: ', l:msg)
         return
     endif
 
-    let l:response = l:msg['response']
-    let l:method = get(l:response, 'method', '')
+    let l:method = get(l:msg, 'method', '')
 
     if l:method ==? '$cquery/publishSemanticHighlighting'
         let l:server = 'cquery'
@@ -43,35 +42,34 @@ function! s:notify_json_rpc(json) abort
         let l:is_skipped = 1
         let l:data_key = 'skippedRanges'
     else
-        " Silently ignore unwanted messages since vim-lsp
-        " doesn't support subscribing to a specific type
+        " Silently ignore unwanted messages
         call lsp_cxx_hl#log('Skipped Message: ', l:method)
         return
     endif
 
     call lsp_cxx_hl#log('Received Message: ', l:method)
 
-    if !has_key(l:response, 'params') ||
-                \ !has_key(l:response['params'], l:data_key) ||
-                \ !has_key(l:response['params'], 'uri')
-        call lsp_cxx_hl#log('Response has invalid parameters: ', l:response)
+    if !has_key(l:msg, 'params') ||
+                \ !has_key(l:msg['params'], l:data_key) ||
+                \ !has_key(l:msg['params'], 'uri')
+        call lsp_cxx_hl#log('Response has invalid parameters: ', l:msg)
         return
     endif
 
-    let l:bufnr = s:uri2bufnr(l:response['params']['uri'])
+    let l:bufnr = s:uri2bufnr(l:msg['params']['uri'])
 
     if l:is_skipped
         call lsp_cxx_hl#notify_skipped(l:server,
-                    \ l:bufnr, l:response['params'][l:data_key])
+                    \ l:bufnr, l:msg['params'][l:data_key])
     else
         call lsp_cxx_hl#notify_symbols(l:server,
-                    \ l:bufnr, l:response['params'][l:data_key])
+                    \ l:bufnr, l:msg['params'][l:data_key])
     endif
 endfunction
 
 " Receive already extracted skipped region data
 function! lsp_cxx_hl#notify_skipped(server, buffer, skipped) abort
-    let l:bufnr = s:common_notify_checks(a:server, a:buffer, a:symbols)
+    let l:bufnr = s:common_notify_checks(a:server, a:buffer, a:skipped)
 
     try
         call s:notify_skipped(a:server, l:bufnr, a:skipped)
@@ -152,7 +150,7 @@ endfunction
 
 " Section: Helpers
 
-function! s:common_notify_checks(server, buffer, symbols) abort
+function! s:common_notify_checks(server, buffer, data) abort
     if type(a:buffer) ==# type("")
         let l:bufnr = s:uri2bufnr(a:buffer)
     elseif type(a:buffer) ==# type(0)
@@ -165,7 +163,7 @@ function! s:common_notify_checks(server, buffer, symbols) abort
         throw 'buffer does not exist!'
     endif
 
-    if type(a:symbols) !=# type([])
+    if type(a:data) !=# type([])
         throw 'symbols must be a list'
     endif
 

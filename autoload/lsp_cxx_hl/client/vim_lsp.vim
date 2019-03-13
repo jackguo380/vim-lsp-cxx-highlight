@@ -4,7 +4,7 @@ function! lsp_cxx_hl#client#vim_lsp#init() abort
 endfunction
 
 function! s:notification_cb(server, data) abort
-    call lsp_cxx_hl#notify_json_rpc(a:data)
+    call lsp_cxx_hl#notify_json_rpc(get(a:data, 'response', {}))
 endfunction
 
 " User warnings
