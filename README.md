@@ -70,7 +70,8 @@ For a sample vim-lsp configuration see [this](sample-vimrcs/vim-lsp-register.vim
 ## Configuration
 
 The plugin should work without any additional configuration. But if you don't like
-the default settings here are some settings.
+the default settings see `:help vim-lsp-cxx-highlight`
 
-### Settings
+## License
 
+[MIT License](LICENSE.txt)

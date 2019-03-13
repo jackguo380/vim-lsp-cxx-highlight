@@ -8,13 +8,15 @@ Contents ~
    1. Commands ............................... |vim-lsp-cxx-highlight-commands|
    2. Variables ............................. |vim-lsp-cxx-highlight-variables|
    3. Highlight Groups ............... |vim-lsp-cxx-highlight-highlight-groups|
+    a. Preprocessor Skipped Regions .. |vim-lsp-cxx-highlight-hl-group-skipped|
+    b. Semantic Highlighting Symbols . |vim-lsp-cxx-highlight-hl-group-symbols|
   3. Troubleshooting .................. |vim-lsp-cxx-highlight-troubleshooting|
   4. Adding support for more LSP clients .... |vim-lsp-cxx-highlight-extending|
   5. Public API ................................... |vim-lsp-cxx-highlight-api|
-   a. |g:lsp_cxx_hl_loaded| ..................................................
-   b. |lsp_cxx_hl#notify_json_rpc| ...........................................
-   c. |lsp_cxx_hl#notify_skipped| ............................................
-   d. |lsp_cxx_hl#notify_symbols| ............................................
+   1. |g:lsp_cxx_hl_loaded| ..................................................
+   2. |lsp_cxx_hl#notify_json_rpc| ...........................................
+   3. |lsp_cxx_hl#notify_skipped| ............................................
+   4. |lsp_cxx_hl#notify_symbols| ............................................
 
 
 ===============================================================================
@@ -154,6 +156,78 @@ Default = -100.
 >
   let g:lsp_cxx_hl_syntax_priority = -20
 <
+
+===============================================================================
+
+                                       *vim-lsp-cxx-highlight-highlight-groups*
+
+For more details also see syntax/lsp_cxx_highlight.vim from this plugin.
+
+-------------------------------------------------------------------------------
+
+                                       *vim-lsp-cxx-highlight-hl-group-skipped*
+                                                        *LspCxxHlSkippedRegion*
+                                                *LspCxxHlSkippedRegionBeginEnd*
+Preprocessor Skipped Regions           
+
+Preprocessor inactive regions are highlighted using |LspCxxHlSkippedRegion|.
+The first and last lines are highlighted using |LspCxxHlSkippedRegionBeginEnd|,
+this is because cquery/ccls includes the #if/#endif in the inactive region.
+
+Default Mapping
+|LspCxxHlSkippedRegion| -> |Comment|
+|LspCxxHlSkippedRegionBeginEnd| -> |Normal|
+
+-------------------------------------------------------------------------------
+
+                                       *vim-lsp-cxx-highlight-hl-group-symbols*
+                                                                  *LspCxxHlSym*
+Semantic Highlighting Symbols          
+
+Format of highlight groups:
+
+`LspCxxHlSym[<ParentKind>]<Kind>[<StorageClass>]`
+
+ParentKind   - (optional) the enclosing symbol kind
+Kind         - the symbol kind
+StorageClass - (optional) any storage specifiers
+               (None, Extern, Static, PrivateExtern, Auto, Register)
+
+About Kind and ParentKind
+Kind and ParentKind are the same as the language server specification 
+for SymbolKind. E.g. File, Constructor, Enum, etc...
+See https://microsoft.github.io/language-server-protocol/specification#textDocument_documentSymbol
+
+cquery and ccls also add custom values:
+`TypeAlias`    - custom types from typedef
+`Parameter`    - function parameter
+`StaticMethod` - static methods
+`Macro`        - macros and function like macros
+
+Examples
+>
+  LspCxxHlSymClassMethod    - highlight group for methods in a class
+  LspCxxHlSymStructMethod   - highlight group for methods in a struct
+  LspCxxHlSymVariableStatic - highlight group for static variables
+<
+
+                                      *vim-lsp-cxx-highlight-hl-group-priority*
+Highlight Group Priority
+The highlight groups will be tried in this order:
+1. Full match: 
+   `LspCxxHlSym<ParentKind><Kind><StorageClass>`
+
+2. Full match minus StorageClass
+   `LspCxxHlSym<ParentKind><Kind>`
+
+3. Partial match
+   `LspCxxHlSym<Kind><StorageClass>`
+
+4. Partial match minus Storage Class
+   `LspCxxHlSym<Kind>`
+
+The first one that exists will be used.
+
 
 ===============================================================================
 
