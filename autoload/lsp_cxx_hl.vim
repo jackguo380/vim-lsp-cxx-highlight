@@ -347,8 +347,15 @@ endfunction
 
 " Section: Misc Helpers
 function! s:uri2bufnr(uri) abort
+    " Absolute paths on windows has 3 leading /
+    if has('win32') || has('win64')
+        let l:regex = '\c^[a-z]\+:///\?'
+    else
+        let l:regex = '\c^[a-z]\+://'
+    endif
+
     " Remove the leading file:// or whatever protocol is used
-    let l:filename = substitute(a:uri, '\c[a-z]\+://', '', '')
+    let l:filename = substitute(a:uri, l:regex, '', '')
     let l:bufnr = bufnr(l:filename)
 
     if l:bufnr == -1
