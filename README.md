@@ -19,8 +19,8 @@ and seeing how it uses cquery to provide semantic highlighting.
 Left: No Plugin, Right: vim-lsp-cxx-highlight + cquery
 
 <span>
-<img src="images/none.png" width="440"/>
-<img src="images/vim_lsp_cxx_hl.png" width="440"/>
+<img src="images/none.png" width="420"/>
+<img src="images/vim_lsp_cxx_hl.png" width="420"/>
 </span>
 
 ## Requirements
@@ -62,7 +62,7 @@ For `cquery` the following initializationOptions are needed:
 }
 ```
 
-For `ccls` if your `vim` does _not_ have `+byte_offset` or running on windows this initializationOption is needed:
+For `ccls` if your `vim` does _not_ have `+byte_offset` or your code contains CRLF/dos line endings this initializationOption is needed:
 ```json
 {
     "highlight": { "lsRanges" : true }
