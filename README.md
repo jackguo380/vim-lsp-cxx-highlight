@@ -33,12 +33,12 @@ Additionally a compatible language server and language server client is required
 The following language servers and protocol extensions are supported:
 
 - **[cquery](https://www.github.com/cquery-project/cquery)**
- - `$cquery/publishSemanticHighlighting` - semantic highlighting
- - `$cquery/setInactiveRegions` - preprocessor skipped regions
+  - `$cquery/publishSemanticHighlighting` - semantic highlighting
+  - `$cquery/setInactiveRegions` - preprocessor skipped regions
 
 - **[ccls](https://www.github.com/MaskRay/ccls)**
- - `$ccls/publishSemanticHighlight` - semantic highlighting
- - `$ccls/publishSkippedRegions` - preprocessor skipped regions
+  - `$ccls/publishSemanticHighlight` - semantic highlighting
+  - `$ccls/publishSkippedRegions` - preprocessor skipped regions
 
 The following language server clients are supported:
 
@@ -47,7 +47,7 @@ The following language server clients are supported:
 
 ## Install
 
-Using [vim-plug](https://www.github.com/junegunn/vim-plug)
+Using [vim-plug](https://www.github.com/junegunn/vim-plug) (Or use the plugin manager of your choice)
 
 ```vim
 Plug 'prabirshrestha/vim-lsp'

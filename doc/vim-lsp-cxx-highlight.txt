@@ -178,6 +178,12 @@ Default Mapping
 |LspCxxHlSkippedRegion| -> |Comment|
 |LspCxxHlSkippedRegionBeginEnd| -> |Normal|
 
+E.g.
+>
+  " Change skipped regions to Dark Gray
+  highlight LspCxxHlSkippedRegion ctermfg=DarkGray guifg=DarkGray
+<
+
 -------------------------------------------------------------------------------
 
                                        *vim-lsp-cxx-highlight-hl-group-symbols*
@@ -216,18 +222,28 @@ Highlight Group Priority
 The highlight groups will be tried in this order:
 1. Full match: 
    `LspCxxHlSym<ParentKind><Kind><StorageClass>`
+   E.g. `LspCxxHlSymClassMethodStatic`
 
 2. Full match minus StorageClass
    `LspCxxHlSym<ParentKind><Kind>`
+   E.g. `LspCxxHlSymClassMethod`
 
 3. Partial match
    `LspCxxHlSym<Kind><StorageClass>`
+   E.g. `LspCxxHlSymMethodStatic`
 
 4. Partial match minus Storage Class
    `LspCxxHlSym<Kind>`
+   E.g. `LspCxxHlSymMethod`
 
-The first one that exists will be used.
+The first highlight group that exists will be used.
 
+Examples
+>
+  highlight LspCxxHlSymClassMethod ctermfg=Magenta guifg=Magenta
+  highlight LspCxxHlSymStructMethod  ctermfg=Red guifg=Red
+  highlight LspCxxHlSymVariableStatic ctermfg=Blue guifg=Blue
+<
 
 ===============================================================================
 
@@ -266,10 +282,10 @@ couple of options.
 Example pseudo code:
 >
   function OnReceiveMessage(jsonstr)
-    if IsResponse(jsonstr)
+    if IsResponse(a:jsonstr)
       " ...
-    elseif IsNotification(jsonstr)
-      call lsp_cxx_hl#notify_json_rpc(jsonstr)
+    elseif IsNotification(a:jsonstr)
+      call lsp_cxx_hl#notify_json_rpc(a:jsonstr)
     else
       " ...
     endif
@@ -286,9 +302,9 @@ Example pseudo code:
 Example pseudo code:
 >
   function OnReceiveNotification(msg)
-    if msg['method'] ==# '$cquery/publishSemanticHighlighting'
+    if a:msg['method'] ==# '$cquery/publishSemanticHighlighting'
       call lsp_cxx_hl#notify_symbols('cquery',
-          \ msg['params']['uri'], msg['params']['symbols'])
+          \ a:msg['params']['uri'], msg['params']['symbols'])
     elseif " ...
       " ...
     endif

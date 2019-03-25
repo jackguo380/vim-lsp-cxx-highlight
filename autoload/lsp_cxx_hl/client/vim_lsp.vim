@@ -1,3 +1,5 @@
+" vim-lsp support
+
 function! lsp_cxx_hl#client#vim_lsp#init() abort
     call lsp#register_notifications('lsp_cpp_highlight', 
                 \ function('s:notification_cb'))
