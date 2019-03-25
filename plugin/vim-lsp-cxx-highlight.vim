@@ -23,6 +23,11 @@ if exists('g:lsp_loaded')
         autocmd!
         autocmd VimEnter * call lsp_cxx_hl#client#vim_lsp#init()
     augroup END
+elseif exists('g:LanguageClient_serverCommands')
+    augroup lsp_cxx_hl_autostart
+        autocmd!
+        autocmd VimEnter * call lsp_cxx_hl#client#LanguageClient#init()
+    augroup END
 else
     echohl ErrorMsg
     echomsg 'Lsp client not found!'

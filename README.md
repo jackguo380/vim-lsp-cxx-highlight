@@ -43,6 +43,7 @@ The following language servers and protocol extensions are supported:
 The following language server clients are supported:
 
 - **[vim-lsp](https://www.github.com/prabirshrestha/vim-lsp)**
+- **[LanguageClient-neovim](https://github.com/autozimu/LanguageClient-neovim)**
 - (PRs would be appreciated!)
 
 ## Install
