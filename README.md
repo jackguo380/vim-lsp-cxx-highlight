@@ -51,7 +51,10 @@ The following language server clients are supported:
 Using [vim-plug](https://www.github.com/junegunn/vim-plug) (Or use the plugin manager of your choice)
 
 ```vim
-Plug 'prabirshrestha/vim-lsp'
+Plug 'prabirshrestha/vim-lsp' " vim-lsp
+" or
+Plug 'autozimu/LanguageClient-neovim' " LanguageClient-neovim
+
 Plug 'jackguo380/vim-lsp-cxx-highlight'
 ```
 
