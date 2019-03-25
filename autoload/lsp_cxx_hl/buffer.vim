@@ -5,8 +5,9 @@
 " List of variables
 "
 " Preprocessor Skipped Regions:
-" b:lsp_cxx_hl_new_skipped
-"   b:lsp_cxx_hl_skipped was updated
+" b:lsp_cxx_hl_skipped_version
+"   a incrementing counter increased once
+"   b:lsp_cxx_hl_skipped is changed
 "
 " b:lsp_cxx_hl_skipped
 "   preprocessor skipped region list from
@@ -20,13 +21,18 @@
 "   the current buffer # which is highlighted
 "   for preprocessor skipped regions
 "
+" w:lsp_cxx_hl_skipped_version
+"   check against b:lsp_cxx_hl_skipped_version
+"   to determine if highlighting needs to be updated
+"
 " g:lsp_cxx_hl_skipped_timer
 "   if timers are available this is the timer
 "   id for preprocessor skipped regions
 "
 " Symbols:
-" b:lsp_cxx_hl_new_symbols
-"   b:lsp_cxx_hl_symbols was updated
+" b:lsp_cxx_hl_symbols_version
+"   a incrementing counter increased once
+"   everytime b:lsp_cxx_hl_symbols is changed
 "
 " b:lsp_cxx_hl_symbols
 "   ast symbol list from
@@ -46,6 +52,10 @@
 " w:lsp_cxx_hl_symbols_bufnr
 "   the current buffer # which is highlighted
 "   for symbols
+"
+" w:lsp_cxx_hl_symbols_version
+"   check against b:lsp_cxx_hl_symbols_version
+"   to determine if highlighting needs to be updated
 " 
 " g:lsp_cxx_hl_symbols_timer
 "   if timers are available this is the timer
@@ -58,7 +68,6 @@ let s:has_byte_offset = has('byte_offset')
 function! lsp_cxx_hl#buffer#check(...) abort
     let l:force = (a:0 > 0 && a:1)
     let l:bufnr = winbufnr(0)
-    let l:ft_ok = count(g:lsp_cxx_hl_ft_whitelist, &filetype) > 0
 
     call lsp_cxx_hl#verbose_log('buffer#check ', l:force ? '(force) ' : '',
                 \ 'started for ', bufname(l:bufnr))
@@ -67,21 +76,18 @@ function! lsp_cxx_hl#buffer#check(...) abort
     if l:force || !exists('w:lsp_cxx_hl_skipped_matches') ||
                 \ get(b:, 'lsp_cxx_hl_new_skipped', 0) ||
                 \ get(w:, 'lsp_cxx_hl_skipped_bufnr', -1) != l:bufnr
-        let b:lsp_cxx_hl_new_skipped = 0
-
         call s:dispatch_hl_skipped(l:force)
     endif
 
     " symbols
     if l:force || !exists('w:lsp_cxx_hl_symbols_matches') ||
-                \ get(b:, 'lsp_cxx_hl_new_symbols', 0) ||
-                \ get(w:, 'lsp_cxx_hl_symbols_bufnr', -1) != l:bufnr
+                \ get(w:, 'lsp_cxx_hl_symbols_bufnr', -1) != l:bufnr ||
+                \ get(w:, 'lsp_cxx_hl_symbols_version', -1) !=
+                \ get(b:, 'lsp_cxx_hl_symbols_version', 0)
         " Dropped cached matches when we get new data
         if get(b:, 'lsp_cxx_hl_new_symbols', 0)
             unlet! b:lsp_cxx_hl_symbols_positions
         endif
-
-        let b:lsp_cxx_hl_new_symbols = 0
 
         call s:dispatch_hl_symbols(l:force)
     endif

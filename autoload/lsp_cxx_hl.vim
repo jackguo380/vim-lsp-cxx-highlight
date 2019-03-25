@@ -82,9 +82,10 @@ endfunction
 function! s:notify_skipped(server, bufnr, skipped) abort
     let l:begintime = lsp_cxx_hl#profile_begin()
 
+    let l:version = getbufvar(a:bufnr, 'lsp_cxx_hl_skipped_version', 0)
     " No conversion done since ccls and cquery both use the same format
     call setbufvar(a:bufnr, 'lsp_cxx_hl_skipped', a:skipped)
-    call setbufvar(a:bufnr, 'lsp_cxx_hl_new_skipped', 1)
+    call setbufvar(a:bufnr, 'lsp_cxx_hl_skipped_version', l:version + 1)
     call lsp_cxx_hl#profile_end(l:begintime,
                 \ 'notify_skipped ', bufname(a:bufnr))
     doautocmd User lsp_cxx_highlight_check
@@ -108,8 +109,9 @@ function! s:notify_symbols(server, bufnr, symbols)
     let l:is_ccls = (a:server ==# 'ccls')
     let l:n_symbols = s:normalize_symbols(a:symbols, l:is_ccls)
 
+    let l:version = getbufvar(a:bufnr, 'lsp_cxx_hl_symbols_version', 0)
     call setbufvar(a:bufnr, 'lsp_cxx_hl_symbols', l:n_symbols)
-    call setbufvar(a:bufnr, 'lsp_cxx_hl_new_symbols', 1)
+    call setbufvar(a:bufnr, 'lsp_cxx_hl_symbols_version', l:version + 1)
     call lsp_cxx_hl#profile_end(l:begintime,
                 \ 'notify_symbols ', bufname(a:bufnr))
     doautocmd User lsp_cxx_highlight_check
