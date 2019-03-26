@@ -42,6 +42,10 @@
 "   cached position data for faster
 "   re-highlighting
 "
+" b:lsp_cxx_hl_symbols_positions_version
+"   check against b:lsp_cxx_hl_symbols_version
+"   to determine if cached postions needs to be updated
+"
 " w:lsp_cxx_hl_ignored_symbols
 "   symbols not highlighted
 "
@@ -74,8 +78,9 @@ function! lsp_cxx_hl#buffer#check(...) abort
 
     " preprocessor skipped
     if l:force || !exists('w:lsp_cxx_hl_skipped_matches') ||
-                \ get(b:, 'lsp_cxx_hl_new_skipped', 0) ||
-                \ get(w:, 'lsp_cxx_hl_skipped_bufnr', -1) != l:bufnr
+                \ get(w:, 'lsp_cxx_hl_skipped_bufnr', -1) != l:bufnr ||
+                \ get(w:, 'lsp_cxx_hl_skipped_version', -1) !=
+                \ get(b:, 'lsp_cxx_hl_skipped_version', 0)
         call s:dispatch_hl_skipped(l:force)
     endif
 
@@ -84,11 +89,6 @@ function! lsp_cxx_hl#buffer#check(...) abort
                 \ get(w:, 'lsp_cxx_hl_symbols_bufnr', -1) != l:bufnr ||
                 \ get(w:, 'lsp_cxx_hl_symbols_version', -1) !=
                 \ get(b:, 'lsp_cxx_hl_symbols_version', 0)
-        " Dropped cached matches when we get new data
-        if get(b:, 'lsp_cxx_hl_new_symbols', 0)
-            unlet! b:lsp_cxx_hl_symbols_positions
-        endif
-
         call s:dispatch_hl_symbols(l:force)
     endif
 endfunction
@@ -134,7 +134,8 @@ function! s:hl_skipped(force, bufnr, timer) abort
     endif
 
     " No data yet
-    if !exists('b:lsp_cxx_hl_skipped')
+    if !exists('b:lsp_cxx_hl_skipped') ||
+                \ !exists('b:lsp_cxx_hl_skipped_version')
         return
     endif
 
@@ -169,6 +170,7 @@ function! s:hl_skipped(force, bufnr, timer) abort
 
     let w:lsp_cxx_hl_skipped_matches = l:matches
     let w:lsp_cxx_hl_skipped_bufnr = a:bufnr
+    let w:lsp_cxx_hl_skipped_version = b:lsp_cxx_hl_skipped_version
 
     call lsp_cxx_hl#log('hl_skipped highlighted ', len(l:skipped),
                 \ ' skipped preprocessor regions',
@@ -204,6 +206,7 @@ function! s:hl_symbols_wrap(force, bufnr, timer) abort
     call s:clear_matches(l:matches)
 
     unlet! g:lsp_cxx_hl_symbols_timer
+    redraw
 
     call lsp_cxx_hl#profile_end(l:begintime, 'hl_symbols ', bufname(l:bufnr))
 endfunction
@@ -215,18 +218,22 @@ function! s:hl_symbols(force, bufnr, timer) abort
     endif
 
     " No data yet
-    if !exists('b:lsp_cxx_hl_symbols')
+    if !exists('b:lsp_cxx_hl_symbols') ||
+                \ !exists('b:lsp_cxx_hl_symbols_version')
         return
     endif
 
     let l:symbols = b:lsp_cxx_hl_symbols
 
     " Check for cached positions, ignore if forced highlighting
-    if a:force || !exists('b:lsp_cxx_hl_symbols_positions')
+    if a:force || !exists('b:lsp_cxx_hl_symbols_positions') ||
+                \ b:lsp_cxx_hl_symbols_positions_version !=
+                \ get(b:, 'lsp_cxx_hl_symbols_positions_version', -1)
         let [l:hl_group_positions, l:missing_groups] =
                     \ s:hl_symbols_to_positions(l:symbols)
 
         let b:lsp_cxx_hl_symbols_positions = l:hl_group_positions
+        let b:lsp_cxx_hl_symbols_positions_version = b:lsp_cxx_hl_symbols_version
         let w:lsp_cxx_hl_ignored_symbols = l:missing_groups
         let l:cached = 0
     else
@@ -243,7 +250,7 @@ function! s:hl_symbols(force, bufnr, timer) abort
 
     let w:lsp_cxx_hl_symbols_matches = l:matches
     let w:lsp_cxx_hl_symbols_bufnr = a:bufnr
-    redraw
+    let w:lsp_cxx_hl_symbols_version = b:lsp_cxx_hl_symbols_version
 
     call lsp_cxx_hl#log('hl_symbols highlighted ', l:cached ? '(cached) ' : '',
                 \ len(l:symbols), ' symbols in file ', bufname(a:bufnr))
