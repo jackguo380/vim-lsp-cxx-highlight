@@ -227,7 +227,7 @@ function! s:hl_symbols(force, bufnr, timer) abort
 
     " Check for cached positions, ignore if forced highlighting
     if a:force || !exists('b:lsp_cxx_hl_symbols_positions') ||
-                \ b:lsp_cxx_hl_symbols_positions_version !=
+                \ b:lsp_cxx_hl_symbols_version !=
                 \ get(b:, 'lsp_cxx_hl_symbols_positions_version', -1)
         let [l:hl_group_positions, l:missing_groups] =
                     \ s:hl_symbols_to_positions(l:symbols)
