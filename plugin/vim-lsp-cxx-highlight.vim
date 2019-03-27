@@ -18,25 +18,44 @@ let g:lsp_cxx_hl_inactive_region_priority = get(g:,
             \ 'lsp_cxx_hl_inactive_region_priority', -99)
 let g:lsp_cxx_hl_syntax_priority = get(g:, 'lsp_cxx_hl_syntax_priority', -100)
 
-if exists('g:lsp_loaded')
-    augroup lsp_cxx_hl_autostart
-        autocmd!
-        autocmd VimEnter * call lsp_cxx_hl#client#vim_lsp#init()
-    augroup END
-elseif exists('g:LanguageClient_serverCommands')
-    augroup lsp_cxx_hl_autostart
-        autocmd!
-        autocmd VimEnter * call lsp_cxx_hl#client#LanguageClient#init()
-    augroup END
-else
-    echohl ErrorMsg
-    echomsg 'Lsp client not found!'
-    echohl NONE
-    finish
-endif
+function s:initialize() abort
+    let l:ok = 0
+
+    call lsp_cxx_hl#log('lsp_cxx_hl beginning initialization...')
+
+    try
+        call lsp_cxx_hl#client#vim_lsp#init()
+        call lsp_cxx_hl#log('vim-lsp successfully registered')
+        let l:ok = 1
+    catch /E117:.*lsp#register_notifications/
+        call lsp_cxx_hl#log('vim-lsp not detected')
+    catch
+        call lsp_cxx_hl#log('vim-lsp failed to register: ',
+                    \ v:exception)
+    endtry
+
+    try
+        call lsp_cxx_hl#client#LanguageClient#init()
+        call lsp_cxx_hl#log('LanguageClient-neovim successfully registered')
+        let l:ok = 1
+    catch /E117:.*LanguageClient#registerHandlers/
+        call lsp_cxx_hl#log('LanguageClient-neovim not detected')
+    catch
+        call lsp_cxx_hl#log('LanguageClient-neovim failed to register: ',
+                    \ v:exception)
+    endtry
+
+    if l:ok != 1
+        call lsp_cxx_hl#log('Failed to find a compatible LSP client')
+        echohl ErrorMsg
+        echomsg 'Lsp client not found!'
+        echohl NONE
+    endif
+endfunction
 
 augroup lsp_cxx_highlight
     autocmd!
+    autocmd VimEnter * call s:initialize()
     autocmd VimEnter,ColorScheme * runtime syntax/lsp_cxx_highlight.vim
     autocmd ColorScheme * call lsp_cxx_hl#buffer#check(1)
     autocmd BufEnter,WinEnter * call lsp_cxx_hl#buffer#check(0)

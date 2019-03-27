@@ -10,7 +10,7 @@ function! lsp_cxx_hl#client#LanguageClient#init() abort
                 \ 'lsp_cxx_hl#client#LanguageClient#ccls_hl',
                 \ '$ccls/publishSkippedRegions':
                 \ 'lsp_cxx_hl#client#LanguageClient#ccls_regions'
-        })
+                \ })
 endfunction
 
 
