@@ -345,7 +345,7 @@ function! s:clear_matches(matches) abort
     for l:match in a:matches
         try
             call matchdelete(l:match)
-        catch /E803: ID not found:/
+        catch /E803/
         endtry
     endfor
 endfunction

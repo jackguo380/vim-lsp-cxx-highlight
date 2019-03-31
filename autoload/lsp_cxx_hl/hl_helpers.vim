@@ -13,7 +13,7 @@ function! lsp_cxx_hl#hl_helpers#resolve_hl_group(pkind, kind, storage) abort
         try " Full Match
             silent execute 'highlight' l:hl_group
             return l:hl_group
-        catch /E411: highlight group not found:/
+        catch /E411/
         endtry
     endfor
 
