@@ -385,20 +385,23 @@ function! s:range_to_matches(s_line, s_char, e_line, e_char) abort
     endif
 
     " multiline symbol
+    let l:s_line = a:s_line < 1 ? 0 : a:s_line
+    let l:e_line = a:e_line > line('$') ? line('$') : a:e_line
+
     let l:matches = []
 
-    let l:s_line_end = col([a:s_line, '$'])
+    let l:s_line_end = col([l:s_line, '$'])
 
     if l:s_line_end - a:s_char >= 0
-        call add(l:matches, [a:s_line, a:s_char, l:s_line_end - a:s_char])
+        call add(l:matches, [l:s_line, a:s_char, l:s_line_end - a:s_char])
     endif
 
-    if (a:s_line + 1) < (a:e_line - 1)
-        let l:matches += range(a:s_line + 1, a:e_line - 1)
+    if (l:s_line + 1) < (l:e_line - 1)
+        let l:matches += range(l:s_line + 1, l:e_line - 1)
     endif
 
     if a:e_char - 1 > 0
-        call add(l:matches, [a:e_line, 1, a:e_char - 1])
+        call add(l:matches, [l:e_line, 1, a:e_char - 1])
     endif
 
     return l:matches
