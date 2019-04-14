@@ -1,35 +1,7 @@
-" Buffer/Window specific functionality
+" matchaddpos implementation of symbol highlighting
 "
-" TODO: incremental highlighting
+" Variables:
 "
-" List of variables
-"
-" Preprocessor Skipped Regions:
-" b:lsp_cxx_hl_skipped_version
-"   a incrementing counter increased once
-"   b:lsp_cxx_hl_skipped is changed
-"
-" b:lsp_cxx_hl_skipped
-"   preprocessor skipped region list from
-"   lsp_cxx_hl#notify_skipped_data
-"
-" w:lsp_cxx_hl_skipped_matches
-"   the list of match id's from matchaddpos()
-"   for preprocessor skipped regions
-"
-" w:lsp_cxx_hl_skipped_bufnr
-"   the current buffer # which is highlighted
-"   for preprocessor skipped regions
-"
-" w:lsp_cxx_hl_skipped_version
-"   check against b:lsp_cxx_hl_skipped_version
-"   to determine if highlighting needs to be updated
-"
-" g:lsp_cxx_hl_skipped_timer
-"   if timers are available this is the timer
-"   id for preprocessor skipped regions
-"
-" Symbols:
 " b:lsp_cxx_hl_symbols_version
 "   a incrementing counter increased once
 "   everytime b:lsp_cxx_hl_symbols is changed
@@ -68,116 +40,29 @@
 let s:has_timers = has('timers')
 let s:has_byte_offset = has('byte_offset')
 
-" Args: (<force> = 0)
-function! lsp_cxx_hl#buffer#check(...) abort
-    let l:force = (a:0 > 0 && a:1)
+function! lsp_cxx_hl#match#symbols#notify(bufnr, symbols) abort
+    let l:version = getbufvar(a:bufnr, 'lsp_cxx_hl_symbols_version', 0)
+    call setbufvar(a:bufnr, 'lsp_cxx_hl_symbols', a:symbols)
+    call setbufvar(a:bufnr, 'lsp_cxx_hl_symbols_version', l:version + 1)
+endfunction
+
+function! lsp_cxx_hl#match#symbols#check(force) abort
     let l:bufnr = winbufnr(0)
 
-    call lsp_cxx_hl#verbose_log('buffer#check ', l:force ? '(force) ' : '',
+    call lsp_cxx_hl#verbose_log('match check symbols ',
+                \ a:force ? '(force) ' : '',
                 \ 'started for ', bufname(l:bufnr))
 
-    " preprocessor skipped
-    if l:force || !exists('w:lsp_cxx_hl_skipped_matches') ||
-                \ get(w:, 'lsp_cxx_hl_skipped_bufnr', -1) != l:bufnr ||
-                \ get(w:, 'lsp_cxx_hl_skipped_version', -1) !=
-                \ get(b:, 'lsp_cxx_hl_skipped_version', 0)
-        call s:dispatch_hl_skipped(l:force)
-    endif
-
     " symbols
-    if l:force || !exists('w:lsp_cxx_hl_symbols_matches') ||
+    if a:force || !exists('w:lsp_cxx_hl_symbols_matches') ||
                 \ get(w:, 'lsp_cxx_hl_symbols_bufnr', -1) != l:bufnr ||
                 \ get(w:, 'lsp_cxx_hl_symbols_version', -1) !=
                 \ get(b:, 'lsp_cxx_hl_symbols_version', 0)
-        call s:dispatch_hl_symbols(l:force)
+        call s:dispatch(a:force)
     endif
 endfunction
 
-function! s:dispatch_hl_skipped(force) abort
-    if s:has_timers
-        if get(g:, 'lsp_cxx_hl_skipped_timer', -1) != -1
-            call lsp_cxx_hl#verbose_log('stopped hl_skipped timer')
-            call timer_stop(g:lsp_cxx_hl_skipped_timer)
-        endif
-
-        let g:lsp_cxx_hl_skipped_timer = timer_start(10,
-                    \ function('s:hl_skipped_wrap', [a:force, winbufnr(0)]))
-    else
-        call s:hl_skipped_wrap(a:force, winbufnr(0), 0)
-    endif
-endfunction
-
-function! s:hl_skipped_wrap(force, bufnr, timer) abort
-    let l:begintime = lsp_cxx_hl#profile_begin()
-
-    let l:matches = get(w:, 'lsp_cxx_hl_skipped_matches', [])
-    unlet! w:lsp_cxx_hl_skipped_matches
-    unlet! w:lsp_cxx_hl_skipped_bufnr
-
-    let l:bufnr = winbufnr(0)
-
-    call s:hl_skipped(a:force, l:bufnr, a:timer)
-
-    " Clear old highlighting after finishing highlighting
-    call s:clear_matches(l:matches)
-
-    redraw
-
-    unlet! g:lsp_cxx_hl_skipped_timer
-    call lsp_cxx_hl#profile_end(l:begintime, 'hl_skipped ', bufname(l:bufnr))
-endfunction
-
-function! s:hl_skipped(force, bufnr, timer) abort
-    " Bad filetype
-    if !a:force && count(g:lsp_cxx_hl_ft_whitelist, &filetype) == 0
-        return
-    endif
-
-    " No data yet
-    if !exists('b:lsp_cxx_hl_skipped') ||
-                \ !exists('b:lsp_cxx_hl_skipped_version')
-        return
-    endif
-
-    let l:skipped = b:lsp_cxx_hl_skipped
-
-    let l:begin_end_pos = []
-    let l:positions = []
-    for l:range in l:skipped
-        let l:cur_positions = lsp_cxx_hl#buffer#lsrange2pos(l:range)
-
-        if len(l:cur_positions) >= 1
-            call add(l:begin_end_pos, l:cur_positions[0])
-        endif
-
-        if len(l:cur_positions) >= 2
-            call add(l:begin_end_pos, l:cur_positions[-1])
-            let l:positions += l:cur_positions[1:-2]
-        endif
-
-    endfor
-
-    let l:matches = lsp_cxx_hl#hl_helpers#matchaddpos_long(
-                \ 'LspCxxHlSkippedRegion',
-                \ l:positions,
-                \ g:lsp_cxx_hl_inactive_region_priority)
-
-    let l:matches += lsp_cxx_hl#hl_helpers#matchaddpos_long(
-                \ 'LspCxxHlSkippedRegionBeginEnd',
-                \ l:begin_end_pos,
-                \ g:lsp_cxx_hl_inactive_region_priority)
-
-
-    let w:lsp_cxx_hl_skipped_matches = l:matches
-    let w:lsp_cxx_hl_skipped_bufnr = a:bufnr
-    let w:lsp_cxx_hl_skipped_version = b:lsp_cxx_hl_skipped_version
-
-    call lsp_cxx_hl#log('hl_skipped highlighted ', len(l:skipped),
-                \ ' skipped preprocessor regions',
-                \ ' in file ', bufname(a:bufnr))
-endfunction
-
-function! s:dispatch_hl_symbols(force) abort
+function! s:dispatch(force) abort
     if s:has_timers
         if get(g:, 'lsp_cxx_hl_symbols_timer', -1) != -1
             call lsp_cxx_hl#verbose_log('stopped hl_symbols timer')
@@ -203,7 +88,7 @@ function! s:hl_symbols_wrap(force, bufnr, timer) abort
     call s:hl_symbols(a:force, l:bufnr, a:timer)
 
     " Clear old highlighting after finishing highlighting
-    call s:clear_matches(l:matches)
+    call lsp_cxx_hl#match#clear_matches(l:matches)
 
     unlet! g:lsp_cxx_hl_symbols_timer
     redraw
@@ -243,7 +128,7 @@ function! s:hl_symbols(force, bufnr, timer) abort
 
     let l:matches = []
     for [l:hl_group, l:positions] in items(l:hl_group_positions)
-        let l:matches += lsp_cxx_hl#hl_helpers#matchaddpos_long(
+        let l:matches += lsp_cxx_hl#match#matchaddpos_long(
                     \ l:hl_group, l:positions,
                     \ g:lsp_cxx_hl_syntax_priority)
     endfor
@@ -270,13 +155,13 @@ function! s:hl_symbols_to_positions(symbols) abort
         let l:positions = []
 
         for l:range in get(l:sym, 'ranges', [])
-            let l:positions += lsp_cxx_hl#buffer#lsrange2pos(l:range)
+            let l:positions += lsp_cxx_hl#match#lsrange2match(l:range)
         endfor
 
         let l:offsets = get(l:sym, 'offsets', [])
         if s:has_byte_offset
             for l:offset in l:offsets
-                let l:positions += lsp_cxx_hl#buffer#offsets2pos(l:offset)
+                let l:positions += lsp_cxx_hl#match#offsets2match(l:offset)
             endfor
         elseif !l:byte_offset_warn_done
             echohl ErrorMsg
@@ -339,70 +224,3 @@ function! s:hl_symbols_to_positions(symbols) abort
     return [l:hl_group_positions, l:missing_groups]
 endfunction
 
-
-" Section: Helpers
-function! s:clear_matches(matches) abort
-    for l:match in a:matches
-        try
-            call matchdelete(l:match)
-        catch /E803/
-        endtry
-    endfor
-endfunction
-
-" Section: Conversion Functions
-function! lsp_cxx_hl#buffer#lsrange2pos(range) abort
-    return s:range_to_matches(
-                \ a:range['start']['line'] + 1,
-                \ a:range['start']['character'] + 1,
-                \ a:range['end']['line'] + 1,
-                \ a:range['end']['character'] + 1
-                \ )
-endfunction
-
-function! lsp_cxx_hl#buffer#offsets2pos(offsets) abort
-    let l:s_byte = a:offsets['L'] + 1
-    let l:e_byte = a:offsets['R'] + 1
-    let l:s_line = byte2line(l:s_byte)
-    let l:e_line = byte2line(l:e_byte)
-
-    return s:range_to_matches(
-                \ l:s_line,
-                \ l:s_byte - line2byte(l:s_line) + 1,
-                \ l:e_line,
-                \ l:e_byte - line2byte(l:e_line) + 1
-                \ )
-endfunction
-
-function! s:range_to_matches(s_line, s_char, e_line, e_char) abort
-    " single line symbol
-    if a:s_line == a:e_line
-        if a:e_char - a:s_char > 0
-            return [[a:s_line, a:s_char, a:e_char - a:s_char]]
-        else
-            return []
-        endif
-    endif
-
-    " multiline symbol
-    let l:s_line = a:s_line < 1 ? 0 : a:s_line
-    let l:e_line = a:e_line > line('$') ? line('$') : a:e_line
-
-    let l:matches = []
-
-    let l:s_line_end = col([l:s_line, '$'])
-
-    if l:s_line_end - a:s_char >= 0
-        call add(l:matches, [l:s_line, a:s_char, l:s_line_end - a:s_char])
-    endif
-
-    if (l:s_line + 1) < (l:e_line - 1)
-        let l:matches += range(l:s_line + 1, l:e_line - 1)
-    endif
-
-    if a:e_char - 1 > 0
-        call add(l:matches, [l:e_line, 1, a:e_char - 1])
-    endif
-
-    return l:matches
-endfunction

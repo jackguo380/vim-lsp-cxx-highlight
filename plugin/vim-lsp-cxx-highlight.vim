@@ -17,6 +17,7 @@ let g:lsp_cxx_hl_ft_whitelist = get(g:, 'lsp_cxx_hl_ft_whitelist',
 let g:lsp_cxx_hl_inactive_region_priority = get(g:,
             \ 'lsp_cxx_hl_inactive_region_priority', -99)
 let g:lsp_cxx_hl_syntax_priority = get(g:, 'lsp_cxx_hl_syntax_priority', -100)
+let g:lsp_cxx_hl_use_text_props = get(g:, 'lsp_cxx_hl_use_text_props', 0)
 
 function s:initialize() abort
     let l:ok = 0
@@ -57,12 +58,11 @@ augroup lsp_cxx_highlight
     autocmd!
     autocmd VimEnter * call s:initialize()
     autocmd VimEnter,ColorScheme * runtime syntax/lsp_cxx_highlight.vim
-    autocmd ColorScheme * call lsp_cxx_hl#buffer#check(1)
-    autocmd BufEnter,WinEnter * call lsp_cxx_hl#buffer#check(0)
-    autocmd User lsp_cxx_highlight_check call lsp_cxx_hl#buffer#check(0)
+    autocmd ColorScheme * call lsp_cxx_hl#match#check(1)
+    autocmd BufEnter,WinEnter * call lsp_cxx_hl#match#check(0)
 augroup END
 
-command! LspCxxHighlight call lsp_cxx_hl#buffer#check(1)
+command! LspCxxHighlight call lsp_cxx_hl#match#check(1)
 
 " Debug Commands
 command! LspCxxHlIgnoredSyms call lsp_cxx_hl#debug#ignored_symbols()

@@ -5,6 +5,7 @@ function! lsp_cxx_hl#debug#dump_symbols()
     let l:count = 0
     for l:sym in get(b:, 'lsp_cxx_hl_symbols', [])
         let l:msg = string(l:count) . ":"
+        let l:msg .= " id = " . get(l:sym, 'id', '')
         let l:msg .= " parentKind = " . get(l:sym, 'parentKind', '')
         let l:msg .= " kind = " . get(l:sym, 'kind', '')
         let l:msg .= " storage = " . get(l:sym, 'storage', '')
@@ -43,12 +44,12 @@ function! lsp_cxx_hl#debug#cursor_symbol()
         let l:pos = []
 
         for l:range in get(l:sym, 'ranges', [])
-            let l:pos += lsp_cxx_hl#buffer#lsrange2pos(l:range)
+            let l:pos += lsp_cxx_hl#match#lsrange2match(l:range)
         endfor
 
         if has('byte_offset')
             for l:offset in get(l:sym, 'offsets', [])
-                let l:pos += lsp_cxx_hl#buffer#offsets2pos(l:offset)
+                let l:pos += lsp_cxx_hl#match#offsets2match(l:offset)
             endfor
         endif
 
@@ -83,6 +84,23 @@ function! lsp_cxx_hl#debug#cursor_symbol()
     endfor
 
     echomsg 'End of Debug Find Cursor Symbol'
+endfunction
+
+function! lsp_cxx_hl#debug#dump_ids()
+    echomsg 'Debug Dump Symbol IDs'
+    echomsg 'IDs:'
+
+    let l:id_set = {}
+
+    for l:sym in get(b:, 'lsp_cxx_hl_symbols', [])
+        let l:id_set[l:sym['id']] = 1
+    endfor
+
+    for l:id in sort(keys(l:id_set))
+        echomsg l:id
+    endfor
+
+    echomsg 'End of Debug Dump Symbol IDs'
 endfunction
 
 function! s:pos2str(pos) abort
