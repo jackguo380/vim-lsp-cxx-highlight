@@ -64,6 +64,9 @@
 " g:lsp_cxx_hl_symbols_timer
 "   if timers are available this is the timer
 "   id for symbols
+"
+" b:lsp_cxx_hl_disable
+"   disable highlighting for this buffer
 
 let s:has_timers = has('timers')
 let s:has_byte_offset = has('byte_offset')
@@ -71,10 +74,24 @@ let s:has_byte_offset = has('byte_offset')
 " Args: (<force> = 0)
 function! lsp_cxx_hl#buffer#check(...) abort
     let l:force = (a:0 > 0 && a:1)
+    let l:reenable = (a:0 > 1 && a:2)
     let l:bufnr = winbufnr(0)
 
     call lsp_cxx_hl#verbose_log('buffer#check ', l:force ? '(force) ' : '',
                 \ 'started for ', bufname(l:bufnr))
+
+    if l:reenable
+        let b:lsp_cxx_hl_disable = 0
+    endif
+
+    if get(b:, 'lsp_cxx_hl_disable', 0)
+        call lsp_cxx_hl#verbose_log('highlighting is disabled for ',
+                    \ bufname(l:bufnr))
+
+        " Need to clear matches to remove highlighting from another buffer
+        call lsp_cxx_hl#buffer#disable()
+        return
+    endif
 
     " preprocessor skipped
     if l:force || !exists('w:lsp_cxx_hl_skipped_matches') ||
@@ -91,6 +108,16 @@ function! lsp_cxx_hl#buffer#check(...) abort
                 \ get(b:, 'lsp_cxx_hl_symbols_version', 0)
         call s:dispatch_hl_symbols(l:force)
     endif
+endfunction
+
+function! lsp_cxx_hl#buffer#disable() abort
+    let b:lsp_cxx_hl_disable = 1
+    call s:clear_matches(get(w:, 'lsp_cxx_hl_skipped_matches', []))
+    call s:clear_matches(get(w:, 'lsp_cxx_hl_symbols_matches', []))
+    unlet! w:lsp_cxx_hl_skipped_matches
+    unlet! w:lsp_cxx_hl_skipped_bufnr
+    unlet! w:lsp_cxx_hl_symbols_matches
+    unlet! w:lsp_cxx_hl_symbols_bufnr
 endfunction
 
 function! s:dispatch_hl_skipped(force) abort

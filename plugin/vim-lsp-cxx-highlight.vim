@@ -57,12 +57,13 @@ augroup lsp_cxx_highlight
     autocmd!
     autocmd VimEnter * call s:initialize()
     autocmd VimEnter,ColorScheme * runtime syntax/lsp_cxx_highlight.vim
-    autocmd ColorScheme * call lsp_cxx_hl#buffer#check(1)
-    autocmd BufEnter,WinEnter * call lsp_cxx_hl#buffer#check(0)
-    autocmd User lsp_cxx_highlight_check call lsp_cxx_hl#buffer#check(0)
+    autocmd ColorScheme * call lsp_cxx_hl#buffer#check(1, 0)
+    autocmd BufEnter,WinEnter * call lsp_cxx_hl#buffer#check(0, 0)
+    autocmd User lsp_cxx_highlight_check call lsp_cxx_hl#buffer#check(0, 0)
 augroup END
 
-command! LspCxxHighlight call lsp_cxx_hl#buffer#check(1)
+command! LspCxxHighlight call lsp_cxx_hl#buffer#check(1, 1)
+command! LspCxxHighlightDisable call lsp_cxx_hl#buffer#disable()
 
 " Debug Commands
 command! LspCxxHlIgnoredSyms call lsp_cxx_hl#debug#ignored_symbols()
