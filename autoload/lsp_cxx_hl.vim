@@ -186,6 +186,7 @@ function! s:normalize_symbols(symbols, is_ccls) abort
     if a:is_ccls
         let l:id_key = 'id'
         let l:range_key = 'lsRanges'
+        let l:is_offset = 0
 
         " Determine if we are using offsets
         " Finding one key should be enough
