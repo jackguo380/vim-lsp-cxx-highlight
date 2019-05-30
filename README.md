@@ -43,7 +43,7 @@ The following language servers and protocol extensions are supported:
 The following language server clients are supported:
 
 - **[vim-lsp](https://www.github.com/prabirshrestha/vim-lsp)**
-- **[LanguageClient-neovim](https://github.com/autozimu/LanguageClient-neovim)** (Beta)
+- **[LanguageClient-neovim](https://github.com/autozimu/LanguageClient-neovim)**
 - (PRs would be appreciated!)
 
 ## Install
@@ -74,6 +74,8 @@ For `ccls` if your `vim` does _not_ have `+byte_offset` or your code contains CR
 ```
 
 For a sample vim-lsp configuration see [this](sample-vimrcs/vim-lsp-register.vim)
+
+For a sample LanguageClient-neovim configuration see [this](sample-vimrcs/LanguageClient-register.vim)
 
 ## Configuration
 
