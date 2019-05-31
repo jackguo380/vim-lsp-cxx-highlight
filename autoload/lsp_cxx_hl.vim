@@ -72,46 +72,36 @@ function! lsp_cxx_hl#notify_skipped(server, buffer, skipped) abort
     let l:bufnr = s:common_notify_checks(a:server, a:buffer, a:skipped)
 
     try
-        call s:notify_skipped(a:server, l:bufnr, a:skipped)
+        let l:begintime = lsp_cxx_hl#profile_begin()
+
+        call lsp_cxx_hl#hl#notify_skipped(l:bufnr, a:skipped)
+
+        call lsp_cxx_hl#profile_end(l:begintime,
+                    \ 'notify_skipped ', bufname(l:bufnr))
     catch
         call lsp_cxx_hl#log('notify_skipped error: ', v:exception, 'at',
                     \ v:throwpoint)
     endtry
 endfunction
 
-function! s:notify_skipped(server, bufnr, skipped) abort
-    let l:begintime = lsp_cxx_hl#profile_begin()
-
-    call lsp_cxx_hl#match#skipped#notify(a:bufnr, a:skipped)
-    call lsp_cxx_hl#match#skipped#check(0)
-
-    call lsp_cxx_hl#profile_end(l:begintime,
-                \ 'notify_skipped ', bufname(a:bufnr))
-endfunction!
-
 " Receive already extracted symbol data
 function! lsp_cxx_hl#notify_symbols(server, buffer, symbols) abort
     let l:bufnr = s:common_notify_checks(a:server, a:buffer, a:symbols)
 
     try
-        call s:notify_symbols(a:server, l:bufnr, a:symbols)
+        let l:begintime = lsp_cxx_hl#profile_begin()
+
+        let l:n_symbols = lsp_cxx_hl#parse#normalize_symbols(a:symbols,
+                    \ (a:server ==# 'ccls'))
+
+        call lsp_cxx_hl#hl#notify_symbols(l:bufnr, l:n_symbols)
+
+        call lsp_cxx_hl#profile_end(l:begintime,
+                    \ 'notify_symbols ', bufname(l:bufnr))
     catch
         call lsp_cxx_hl#log('notify_symbols error: ', v:exception, 'at',
                     \ v:throwpoint)
     endtry
-endfunction
-
-function! s:notify_symbols(server, bufnr, symbols)
-    let l:begintime = lsp_cxx_hl#profile_begin()
-
-    let l:n_symbols = lsp_cxx_hl#parse#normalize_symbols(a:symbols,
-                \ (a:server ==# 'ccls'))
-
-    call lsp_cxx_hl#match#symbols#notify(a:bufnr, l:n_symbols)
-    call lsp_cxx_hl#match#symbols#check(0)
-
-    call lsp_cxx_hl#profile_end(l:begintime,
-                \ 'notify_symbols ', bufname(a:bufnr))
 endfunction
 
 " Log

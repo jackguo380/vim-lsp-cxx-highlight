@@ -65,6 +65,13 @@ highlighted or has stale highlight consider filing a issue on github.
 
 -------------------------------------------------------------------------------
 
+                                                       *LspCxxHighlightDisable*
+:LspCxxHighlightDisable
+
+Disable highlighting for this buffer. Renable by using |:LspCxxHighlight|.
+
+-------------------------------------------------------------------------------
+
                                                           *LspCxxHlIgnoredSyms*
 :LspCxxHlIgnoredSyms
 

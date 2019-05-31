@@ -1,14 +1,5 @@
 " Common helpers for matchaddpos
 
-" Args: (<force> = 0)
-function! lsp_cxx_hl#match#check(...) abort
-    let l:force = (a:0 > 0 && a:1)
-
-    call lsp_cxx_hl#match#skipped#check(l:force)
-
-    call lsp_cxx_hl#match#symbols#check(l:force)
-endfunction
-
 function! lsp_cxx_hl#match#clear_matches(matches) abort
     for l:match in a:matches
         try

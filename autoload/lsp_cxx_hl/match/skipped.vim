@@ -51,6 +51,14 @@ function lsp_cxx_hl#match#skipped#check(force) abort
     endif
 endfunction
 
+function! lsp_cxx_hl#match#skipped#clear() abort
+    let l:matches = get(w:, 'lsp_cxx_hl_skipped_matches', [])
+    unlet! w:lsp_cxx_hl_skipped_matches
+    unlet! w:lsp_cxx_hl_skipped_bufnr
+
+    call lsp_cxx_hl#match#clear_matches(l:matches)
+endfunction
+
 function! s:dispatch(force) abort
     if s:has_timers
         if get(g:, 'lsp_cxx_hl_skipped_timer', -1) != -1
