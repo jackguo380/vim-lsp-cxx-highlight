@@ -44,7 +44,7 @@ The following language server clients are supported:
 
 - **[vim-lsp](https://www.github.com/prabirshrestha/vim-lsp)**
 - **[LanguageClient-neovim](https://github.com/autozimu/LanguageClient-neovim)**
-- (PRs would be appreciated!)
+- **[coc.nvim](https://github.com/neoclide/coc.nvim)**
 
 ## Install
 
@@ -54,6 +54,8 @@ Using [vim-plug](https://www.github.com/junegunn/vim-plug) (Or use the plugin ma
 Plug 'prabirshrestha/vim-lsp' " vim-lsp
 " or
 Plug 'autozimu/LanguageClient-neovim' " LanguageClient-neovim
+" or
+Plug 'neoclide/coc.nvim'
 
 Plug 'jackguo380/vim-lsp-cxx-highlight'
 ```
@@ -73,9 +75,11 @@ For `ccls` if your `vim` does _not_ have `+byte_offset` or your code contains CR
 }
 ```
 
-For a sample vim-lsp configuration see [this](sample-vimrcs/vim-lsp-register.vim)
+For a sample vim-lsp configuration see [this](sample-configs/vim-lsp-register.vim)
 
-For a sample LanguageClient-neovim configuration see [this](sample-vimrcs/LanguageClient-register.vim)
+For a sample LanguageClient-neovim configuration see [this](sample-configs/LanguageClient-register.vim)
+
+For a sample coc.nvim coc-settings.json see [this](sample-configs/coc-settings.json)
 
 ## Configuration
 

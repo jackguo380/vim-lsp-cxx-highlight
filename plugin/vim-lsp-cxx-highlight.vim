@@ -46,6 +46,17 @@ function s:initialize() abort
                     \ v:exception)
     endtry
 
+    try
+        call lsp_cxx_hl#client#coc#init()
+        call lsp_cxx_hl#log('coc.nvim successfully registered')
+        let l:ok = 1
+    catch /E117:.*CocRegistNotification/
+        call lsp_cxx_hl#log('coc.nvim not detected')
+    catch
+        call lsp_cxx_hl#log('coc.nvim failed to register: ',
+                    \ v:exception)
+    endtry
+
     if l:ok != 1
         call lsp_cxx_hl#log('Failed to find a compatible LSP client')
         echohl ErrorMsg
