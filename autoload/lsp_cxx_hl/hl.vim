@@ -12,9 +12,6 @@ function! lsp_cxx_hl#hl#check(...) abort
     endif
 
     if g:lsp_cxx_hl_use_text_props
-        echohl Error
-        echoerr "textprops not implemented!"
-        echohl None
     else
         call lsp_cxx_hl#match#symbols#check(l:force)
         call lsp_cxx_hl#match#skipped#check(l:force)

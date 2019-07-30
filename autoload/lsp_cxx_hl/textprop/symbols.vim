@@ -65,7 +65,7 @@ function! s:hl_symbols_wrap(bufnr, timer) abort
     call lsp_cxx_hl#profile_end(l:begintime, 'hl_symbols (textprop) ', bufname(l:bufnr))
 endfunction
 
-function! s:hl_symbols(force, bufnr, timer) abort
+function! s:hl_symbols(bufnr, timer) abort
     " Bad filetype
     if count(g:lsp_cxx_hl_ft_whitelist, &filetype) == 0
         return
@@ -76,45 +76,45 @@ function! s:hl_symbols(force, bufnr, timer) abort
         return
     endif
 
-    let l:symbols = b:lsp_cxx_hl_symbols
+    let l:prop_id = lsp_cxx_hl#textprop#gen_prop_id()
 
-    let [l:hl_group_positions, l:missing_groups] =
-                \ s:hl_symbols_to_positions(l:symbols)
-
-    let b:lsp_cxx_hl_ignored_symbols = l:missing_groups
-
-    let l:matches = []
-    for [l:hl_group, l:positions] in items(l:hl_group_positions)
-        let l:matches += lsp_cxx_hl#match#matchaddpos_long(
-                    \ l:hl_group, l:positions,
-                    \ g:lsp_cxx_hl_syntax_priority)
-    endfor
-
-    call lsp_cxx_hl#log('hl_symbols highlighted ', l:cached ? '(cached) ' : '',
-                \ len(l:symbols), ' symbols in file ', bufname(a:bufnr))
-endfunction
-
-function! s:hl_symbols_to_positions(symbols) abort
     let l:hl_group_positions = {}
     let l:missing_groups = {}
 
     let l:byte_offset_warn_done = 0
-    " Cache results per session to ensure consistent highlighting
-    " and reduce the number of times highlight groups are re resolved
-    let l:hl_group_cache = {}
 
-    for l:sym in a:symbols
-        " Match Positions
-        let l:positions = []
+    for l:sym in b:lsp_cxx_hl_symbols
+        " Create prop type
+        let l:hl_group = 'LspCxxHlSym'
+                    \ . l:sym['parentKind']
+                    \ . l:sym['kind']
+                    \ . l:sym['storage']
+
+        if len(prop_type_get(l:hl_group)) == 0
+            let l:resolved_hl_group = lsp_cxx_hl#hl_helpers#resolve_hl_group(
+                        \ l:sym['parentKind'],
+                        \ l:sym['kind'],
+                        \ l:sym['storage'])
+
+            if len(l:resolved_hl_group) == 0
+                let l:resolved_hl_group = 'None'
+            endif
+
+            call lsp_cxx_hl#textprop#syn_prop_type_add(l:hl_group,
+                        \ l:resolved_hl_group)
+        endif
+
+        " Add props
+        let l:props = []
 
         for l:range in get(l:sym, 'ranges', [])
-            let l:positions += lsp_cxx_hl#match#lsrange2match(l:range)
+            let l:props += lsp_cxx_hl#textprop#lsrange2prop(l:range)
         endfor
 
         let l:offsets = get(l:sym, 'offsets', [])
         if s:has_byte_offset
             for l:offset in l:offsets
-                let l:positions += lsp_cxx_hl#match#offsets2match(l:offset)
+                let l:props += lsp_cxx_hl#match#offsets2prop(l:offset)
             endfor
         elseif !l:byte_offset_warn_done
             echohl ErrorMsg
@@ -126,55 +126,21 @@ function! s:hl_symbols_to_positions(symbols) abort
             let l:byte_offset_warn_done = 1
         endif
 
-        " Highlight group
-        let l:hl_group = 'LspCxxHlSym'
-                    \ . l:sym['parentKind']
-                    \ . l:sym['kind']
-                    \ . l:sym['storage']
+        for l:prop in l:props
+            let l:prop[2]['id'] = l:prop_id
+            call prop_add(l:prop[0], l:prop[1], l:prop[2])
+        endfor
 
-        if !has_key(l:hl_group_cache, l:hl_group)
-            let l:hl_group_c = lsp_cxx_hl#hl_helpers#resolve_hl_group(
-                        \ l:sym['parentKind'],
-                        \ l:sym['kind'],
-                        \ l:sym['storage'])
+        " TODO: missing groups
+        " if !has_key(l:missing_groups, l:hl_group)
+        "     let l:missing_groups[l:hl_group] = []
+        " endif
 
-            let l:hl_group_cache[l:hl_group] = l:hl_group_c
-        else
-            let l:hl_group_c = l:hl_group_cache[l:hl_group]
-        endif
-
-        if len(l:hl_group_c) > 0
-            if !has_key(l:hl_group_positions, l:hl_group_c)
-                let l:hl_group_positions[l:hl_group_c] = []
-            endif
-
-            let l:hl_group_positions[l:hl_group_c] += l:positions
-        else
-            if !has_key(l:missing_groups, l:hl_group)
-                let l:missing_groups[l:hl_group] = []
-            endif
-
-            let l:missing_groups[l:hl_group] += l:positions
-        endif
+        " let l:missing_groups[l:hl_group] += l:props
     endfor
 
-    call lsp_cxx_hl#verbose_log('hl resolve table:')
-    for [l:hl_group, l:hl_group_c] in items(l:hl_group_cache)
-        call lsp_cxx_hl#verbose_log('  ', l:hl_group, ' -> ', l:hl_group_c)
-    endfor
-
-    let l:missing_sym_count = 0
-    for l:pos in values(l:missing_groups)
-        let l:missing_sym_count += len(l:pos)
-    endfor
-
-    if l:missing_sym_count > 0
-        call lsp_cxx_hl#log('hl_symbols_to_positions missing symbols for ',
-                    \ l:missing_sym_count, ' symbols in file ',
-                    \ bufname(winbufnr(0)))
-    endif
-
-    return [l:hl_group_positions, l:missing_groups]
+    call lsp_cxx_hl#log('hl_symbols (textprop) highlighted ',
+                \ len(l:symbols), ' symbols in file ', bufname(a:bufnr))
 endfunction
 
 
