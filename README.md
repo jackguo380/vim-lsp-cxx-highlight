@@ -86,6 +86,26 @@ For a sample coc.nvim coc-settings.json see [this](sample-configs/coc-settings.j
 The plugin should work without any additional configuration. But if you don't like
 the default settings see `:help vim-lsp-cxx-highlight`
 
+### Vim Text Properties (Beta)
+
+vim-lsp-cxx-highlight now has support for Vim 8.1's text properties (See `:help textprop`).
+
+What using text-properties improves:
+ - Highlighting moves around with the text, inserting new lines/words no longer messes things up
+ - Deleting lines removes highlighting attached to text
+ - Some performance improvements? (Unverified)
+
+Support for this feature has been tested on Vim version `8.1.1722`, older versions may have problems.
+It is recommended to upgrade to this version or newer.
+
+To enable:
+```vim
+let g:lsp_cxx_hl_use_text_props = 1
+```
+
+This is a experimental feature so it may be quite buggy, please file bug reports!
+
+
 ## License
 
 [MIT License](LICENSE.txt)

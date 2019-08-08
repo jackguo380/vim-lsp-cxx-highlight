@@ -164,6 +164,21 @@ Default = -100.
   let g:lsp_cxx_hl_syntax_priority = -20
 <
 
+-------------------------------------------------------------------------------
+
+                    *lsp_cxx_hl_use_text_props* *g:lsp_cxx_hl_use_text_props*
+g:lsp_cxx_hl_use_text_props 
+
+Warning: This a fairly new feature in Vim and may be buggy.
+
+With Vim 8.1 |text-properties| have been added which allow for highlighting to
+move with the text.
+
+Default = 0.
+>
+  let g:lsp_cxx_hl_use_text_props = 1 
+<
+
 ===============================================================================
 
                                        *vim-lsp-cxx-highlight-highlight-groups*
