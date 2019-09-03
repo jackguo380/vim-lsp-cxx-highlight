@@ -63,7 +63,7 @@ function! s:hl_skipped_wrap(bufnr, timer) abort
     call s:hl_skipped(a:bufnr, a:timer)
 
     " Clear old highlighting after finishing highlighting
-    "call lsp_cxx_hl#textprop#skipped#clear(a:bufnr, l:old_id)
+    call lsp_cxx_hl#textprop#skipped#clear(a:bufnr, l:old_id)
 
     unlet! g:lsp_cxx_hl_skipped_timer
 
