@@ -166,6 +166,19 @@ Default = -100.
 
 -------------------------------------------------------------------------------
 
+                    *lsp_cxx_hl_use_nvim_text_props* *g:lsp_cxx_hl_use_nvim_text_props*
+g:lsp_cxx_hl_use_text_props 
+
+Use Neovim's |nvim_buf_add_highlight()| which allow for highlighting to
+move with the text. This is auto-enabled for reasonably recent versions of Neovim.
+
+Default = has('nvim-0.3.0').
+>
+  let g:lsp_cxx_hl_use_nvim_text_props = 1 
+<
+
+-------------------------------------------------------------------------------
+
                     *lsp_cxx_hl_use_text_props* *g:lsp_cxx_hl_use_text_props*
 g:lsp_cxx_hl_use_text_props 
 

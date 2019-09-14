@@ -68,7 +68,7 @@ For `cquery` the following initializationOptions are needed:
 }
 ```
 
-For `ccls` if your `vim` does _not_ have `+byte_offset` or your code contains CRLF/dos line endings this initializationOption is needed:
+For `ccls` it is recommended to have this initializationOption unless your `vim` does not support `+byte_offset`:
 ```json
 {
     "highlight": { "lsRanges" : true }
