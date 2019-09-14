@@ -15,6 +15,9 @@ let s:has_timers = has('timers')
 function! lsp_cxx_hl#textprop#skipped#notify(bufnr, skipped) abort
     call setbufvar(a:bufnr, 'lsp_cxx_hl_skipped', a:skipped)
 
+    call lsp_cxx_hl#verbose_log('textprop notify skipped regions ',
+                \ 'for ', bufname(a:bufnr))
+
     let l:curbufnr = winbufnr(0)
 
     if a:bufnr == l:curbufnr
@@ -114,17 +117,10 @@ function! s:hl_skipped(bufnr, timer) abort
 
     for l:prop in l:props
         call extend(l:prop[2], l:prop_extra)
-        call lsp_cxx_hl#log('prop = ', l:prop)
         call prop_add(l:prop[0], l:prop[1], l:prop[2])
     endfor
 
     let b:lsp_cxx_hl_skipped_id = l:prop_id
-
-    "let l:matches += lsp_cxx_hl#match#matchaddpos_long(
-    "            \ 'LspCxxHlSkippedRegionBeginEnd',
-    "            \ l:begin_end_pos,
-    "            \ g:lsp_cxx_hl_inactive_region_priority)
-
 
     call lsp_cxx_hl#log('hl_skipped (textprop) highlighted ', len(b:lsp_cxx_hl_skipped),
                 \ ' skipped preprocessor regions',
