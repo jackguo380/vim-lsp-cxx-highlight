@@ -78,7 +78,8 @@ function! s:hl_symbols_wrap(bufnr, timer) abort
 
     unlet! g:lsp_cxx_hl_symbols_timer
 
-    call lsp_cxx_hl#profile_end(l:begintime, 'hl_symbols (textprop) ', bufname(a:bufnr))
+    call lsp_cxx_hl#profile_end(l:begintime, 'hl_symbols (textprop) ',
+                \ bufname(a:bufnr))
 endfunction
 
 function! s:hl_symbols(bufnr, timer) abort
@@ -169,7 +170,8 @@ function! s:hl_symbols(bufnr, timer) abort
     endfor
 
     call lsp_cxx_hl#log('hl_symbols (textprop) highlighted ',
-                \ len(b:lsp_cxx_hl_symbols), ' symbols in file ', bufname(a:bufnr))
+                \ len(b:lsp_cxx_hl_symbols), ' symbols in file ',
+                \ bufname(a:bufnr))
 
     let b:lsp_cxx_hl_symbols_id = l:prop_id
     let b:lsp_cxx_hl_missing_groups = l:missing_groups
