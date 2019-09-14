@@ -165,7 +165,13 @@ function! s:hl_symbols(bufnr, timer) abort
 
         for l:prop in l:props
             call extend(l:prop[2], l:prop_extra)
-            call prop_add(l:prop[0], l:prop[1], l:prop[2])
+
+            try
+                call prop_add(l:prop[0], l:prop[1], l:prop[2])
+            catch
+                call lsp_cxx_hl#log('textprop prop_add error: ',
+                            \ v:exception)
+            endtry
         endfor
     endfor
 

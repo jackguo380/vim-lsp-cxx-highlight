@@ -44,8 +44,8 @@ function! s:range_to_matches(s_line, s_char, e_line, e_char) abort
     endif
 
     " multiline symbol
-    let l:s_line = a:s_line < 1 ? 0 : a:s_line
-    let l:e_line = a:e_line > line('$') ? line('$') + 1 : a:e_line
+    let l:s_line = a:s_line < 1 ? 1 : a:s_line
+    let l:e_line = a:e_line > line('$') ? line('$') : a:e_line
 
     let l:matches = []
 
