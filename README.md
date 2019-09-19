@@ -18,7 +18,7 @@ and seeing how it uses cquery to provide semantic highlighting.
 
 Left: No Plugin, Right: vim-lsp-cxx-highlight + ccls
 
-![Left: No Plugin, Right: vim-lsp-cxx-highlight + ccls](images/Comparison.png)
+![Left: No Plugin, Right: vim-lsp-cxx-highlight + ccls](images/Comparison.jpg)
 
 ## Requirements
 
