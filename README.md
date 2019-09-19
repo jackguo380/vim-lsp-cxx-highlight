@@ -16,12 +16,9 @@ The main advantage of this plugin is that it is written entirely in vimscript.
 The idea for this came from [vscode-cquery](https://github.com/cquery-project/vscode-cquery)
 and seeing how it uses cquery to provide semantic highlighting.
 
-Left: No Plugin, Right: vim-lsp-cxx-highlight + cquery
+Left: No Plugin, Right: vim-lsp-cxx-highlight + ccls
 
-<span>
-<img src="images/none.png" width="420"/>
-<img src="images/vim_lsp_cxx_hl.png" width="420"/>
-</span>
+![Left: No Plugin, Right: vim-lsp-cxx-highlight + ccls](images/Comparison.png)
 
 ## Requirements
 
