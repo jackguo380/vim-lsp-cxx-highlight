@@ -7,7 +7,6 @@ endif
 
 " Internal variables
 let g:lsp_cxx_hl_loaded = 1
-let g:lsp_cxx_hl_initialized = 0
 
 " Settings
 let g:lsp_cxx_hl_log_file = get(g:, 'lsp_cxx_hl_log_file', '')
@@ -76,6 +75,12 @@ augroup lsp_cxx_highlight
     autocmd ColorScheme * call lsp_cxx_hl#hl#check(1)
     autocmd BufEnter,WinEnter * call lsp_cxx_hl#hl#check(0)
 augroup END
+
+" Handle delayed plugin startup
+if v:vim_did_enter
+    runtime syntax/lsp_cxx_highlight.vim
+    call s:initialize()
+endif
 
 command! LspCxxHighlight call lsp_cxx_hl#hl#enable()
 command! LspCxxHighlightDisable call lsp_cxx_hl#hl#disable()
