@@ -169,7 +169,7 @@ function! s:hl_symbols(bufnr, timer) abort
             try
                 call prop_add(l:prop[0], l:prop[1], l:prop[2])
             catch
-                call lsp_cxx_hl#log('textprop prop_add error: ',
+                call lsp_cxx_hl#log('textprop prop_add symbol error: ',
                             \ v:exception)
             endtry
         endfor
