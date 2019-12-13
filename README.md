@@ -83,7 +83,7 @@ For a sample coc.nvim coc-settings.json see [this](sample-configs/coc-settings.j
 The plugin should work without any additional configuration. But if you don't like
 the default settings see `:help vim-lsp-cxx-highlight`
 
-### Vim Text Properties (Beta)
+### Vim Text Properties
 
 vim-lsp-cxx-highlight now has support for Vim 8.1's text properties (See `:help textprop`).
 
@@ -99,6 +99,8 @@ To enable:
 ```vim
 let g:lsp_cxx_hl_use_text_props = 1
 ```
+
+**Note:** This is now automatically enabled for vim version 8.2 or greater
 
 This is a experimental feature so it may be quite buggy, please file bug reports!
 

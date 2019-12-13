@@ -16,7 +16,8 @@ let g:lsp_cxx_hl_ft_whitelist = get(g:, 'lsp_cxx_hl_ft_whitelist',
 let g:lsp_cxx_hl_inactive_region_priority = get(g:,
             \ 'lsp_cxx_hl_inactive_region_priority', -99)
 let g:lsp_cxx_hl_syntax_priority = get(g:, 'lsp_cxx_hl_syntax_priority', -100)
-let g:lsp_cxx_hl_use_text_props = get(g:, 'lsp_cxx_hl_use_text_props', 0)
+let g:lsp_cxx_hl_use_text_props = get(g:, 'lsp_cxx_hl_use_text_props',
+            \ (has('textprop') && v:version >= 802))
 let g:lsp_cxx_hl_use_nvim_text_props = get(g:,
             \ 'lsp_cxx_hl_use_nvim_text_props', has('nvim-0.3.0'))
 let g:lsp_cxx_hl_text_prop_refresh_count = get(g:,

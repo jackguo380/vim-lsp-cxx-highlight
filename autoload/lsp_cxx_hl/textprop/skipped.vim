@@ -97,12 +97,20 @@ function! s:hl_skipped(bufnr, timer) abort
     for l:range in b:lsp_cxx_hl_skipped 
         let l:prop = lsp_cxx_hl#textprop#lsrange2prop(l:range)
 
+        " Remove the beginnings and ends of the region
+        " since it includes them (#if/#endifs)
         if l:prop[0] < get(l:prop[2], 'end_lnum', 0)
             let l:prop[0] += 1
 
             if l:prop[0] < l:prop[2]['end_lnum']
                 let l:prop[2]['end_lnum'] -= 1
             endif
+        endif
+
+        " Fix the # at the end getting highlighted
+        if get(l:prop[2], 'end_col', 2) <= 1
+            let l:prop[2]['end_lnum'] -= 1
+            let l:prop[2]['end_col'] = col([l:prop[2]['end_lnum'], '$'])
         endif
 
         call add(l:props, l:prop)
