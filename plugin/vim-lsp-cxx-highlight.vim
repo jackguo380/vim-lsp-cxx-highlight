@@ -61,18 +61,22 @@ function s:initialize() abort
                     \ v:exception)
     endtry
 
-    try
-        call lsp_cxx_hl#client#nvim_lsp#init()
-        call lsp_cxx_hl#log('nvim-lsp successfully registered')
-        let l:ok = 1
-    catch /E5105:.*attempt to index field.*lsp.*nil value/
-        call lsp_cxx_hl#log('nvim-lsp not detected')
-    catch /Not Neovim/
-        call lsp_cxx_hl#log('Not registering nvim-lsp as this is not Neovim')
-    catch
-        call lsp_cxx_hl#log('nvim-lsp failed to register: ',
-                    \ v:exception)
-    endtry
+    if l:ok != 1
+      try
+          call lsp_cxx_hl#client#nvim_lsp#init()
+          call lsp_cxx_hl#log('nvim-lsp successfully registered')
+          let l:ok = 1
+      catch /E5105:.*attempt to index field.*lsp.*nil value/
+          call lsp_cxx_hl#log('nvim-lsp not detected')
+      catch /Not Neovim/
+          call lsp_cxx_hl#log('Not registering nvim-lsp as this is not Neovim')
+      catch
+          call lsp_cxx_hl#log('nvim-lsp failed to register: ',
+                      \ v:exception)
+      endtry
+    else
+      call lsp_cxx_hl#log('Not attempting to detect nvim-lsp, since other LSP client already detected')
+    endif
 
     if l:ok != 1
         call lsp_cxx_hl#log('Failed to find a compatible LSP client')
