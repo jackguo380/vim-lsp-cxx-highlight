@@ -88,6 +88,8 @@ augroup lsp_cxx_highlight
     autocmd VimEnter,ColorScheme * runtime syntax/lsp_cxx_highlight.vim
     autocmd ColorScheme * call lsp_cxx_hl#hl#check(1)
     autocmd BufEnter,WinEnter * call lsp_cxx_hl#hl#check(0)
+    " In Neovim 0.5+ this is autocmd only works if registered here
+    autocmd User LanguageClientStarted call lsp_cxx_hl#client#LanguageClient#init()
 augroup END
 
 " Handle delayed plugin startup
