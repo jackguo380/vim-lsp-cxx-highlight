@@ -4,7 +4,7 @@ function! lsp_cxx_hl#client#nvim_lsp#init() abort
     if has('nvim')
         call s:doinit()
 
-        augroup lsp_cxx_hl_language_client_init
+        augroup lsp_cxx_hl_nvim_lsp_init
             autocmd! 
             autocmd VimEnter *  call s:doinit()
         augroup END
