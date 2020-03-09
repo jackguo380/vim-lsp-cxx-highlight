@@ -190,20 +190,17 @@ function! s:unescape_urlencode(str) abort
     let l:matches = []
     let l:start = 0
 
+    let l:str = a:str
     while l:start != -1
-        let l:match = matchstrpos(a:str, '%[0-9A-Fa-f][0-9A-Fa-f]', l:start)
+        let l:match = matchstrpos(l:str, '%[0-9A-Fa-f][0-9A-Fa-f]', l:start)
         let l:start = l:match[2]
 
         if l:start != -1
-            call add(l:matches, l:match)
+            let l:str = l:str[:l:match[1] - 1] . nr2char(str2nr(l:match[0][1:], 16)) .
+                        \ l:str[l:match[2]:]
+            let l:start = l:match[1] + 1
         endif
     endwhile
-
-    let l:str = a:str
-    for l:match in l:matches
-        let l:str = l:str[:l:match[1] - 1] . nr2char(str2nr(l:match[0][1:], 16)) .
-                    \ l:str[l:match[2]:]
-    endfor
 
     call lsp_cxx_hl#verbose_log('unescape_urlencode unescaped filename: ', l:str)
     return l:str
