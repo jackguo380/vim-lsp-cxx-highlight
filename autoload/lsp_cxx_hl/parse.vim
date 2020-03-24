@@ -106,7 +106,9 @@ let s:cxx_symbol_kinds = [
             \ ]
 
 function! s:symbol_kind_str(kind) abort
-    if a:kind < 0
+    if type(a:kind) == type("")
+        return a:kind
+    elseif a:kind < 0
         return 'Unknown'
     elseif a:kind < len(s:lsp_symbol_kinds)
         return s:lsp_symbol_kinds[a:kind]
@@ -131,13 +133,16 @@ endfunction
 
 " ccls uses the enum directly
 function! s:ccls_storage_str(sc) abort
-    return get(['None',
-                \ 'Extern',
-                \ 'Static',
-                \ 'PrivateExtern',
-                \ 'Auto',
-                \ 'Register'],
-                \ a:sc, 'None')
+    if type(a:sc) == type("")
+        return a:sc
+    else
+        return get(['None',
+                    \ 'Extern',
+                    \ 'Static',
+                    \ 'PrivateExtern',
+                    \ 'Auto',
+                    \ 'Register'],
+                    \ a:sc, 'None')
 endfunction
 
 " Section: Parse Cquery Role
