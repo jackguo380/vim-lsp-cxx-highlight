@@ -37,7 +37,7 @@ The following language servers and protocol extensions are supported:
   - `$ccls/publishSemanticHighlight` - semantic highlighting
   - `$ccls/publishSkippedRegions` - preprocessor skipped regions
 
-- **[clangd](https://clangd.llvm.org)
+- **[clangd](https://clangd.llvm.org)**
   - **Requires** [coc.nvim](https://github.com/neoclide/coc.nvim) and [coc-clangd](https://github.com/clangd/coc-clangd)
   - Using the proposed [Semantic Highlighting Protocol](microsoft/language-server-protocol#18)
 
@@ -84,6 +84,7 @@ For `clangd` `coc-settings.json` must have:
 {
     "clangd.semanticHighlighting": "true"
 }
+```
 
 For a sample vim-lsp configuration see [this](sample-configs/vim-lsp-register.vim)
 
