@@ -82,7 +82,7 @@ For `ccls` the following initializationOptions are needed:
 For `clangd` `coc-settings.json` must have:
 ```json
 {
-    "clangd.semanticHighlighting": "true"
+    "clangd.semanticHighlighting": true
 }
 ```
 
