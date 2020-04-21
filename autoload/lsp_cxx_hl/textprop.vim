@@ -10,7 +10,7 @@ function! lsp_cxx_hl#textprop#syn_prop_type_add(name, resolved_hl_group) abort
                 \ }
     if !empty(a:resolved_hl_group)
        let l:opts['highlight'] = a:resolved_hl_group
-     endif
+    endif
     call prop_type_add(a:name, l:opts)
 endfunction
 
