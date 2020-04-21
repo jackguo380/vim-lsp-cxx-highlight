@@ -114,10 +114,6 @@ function! s:hl_symbols(bufnr, timer) abort
                         \ l:sym['kind'],
                         \ l:sym['storage'])
 
-            if len(l:resolved_hl_group) == 0
-                let l:resolved_hl_group = 'None'
-            endif
-
             call lsp_cxx_hl#textprop#syn_prop_type_add(l:hl_group,
                         \ l:resolved_hl_group)
 
@@ -146,7 +142,7 @@ function! s:hl_symbols(bufnr, timer) abort
             let l:byte_offset_warn_done = 1
         endif
 
-        if l:prop_type['highlight'] ==# 'None'
+        if !has_key(l:prop_type, 'highlight')
             if !has_key(l:missing_groups, l:hl_group)
                 let l:missing_groups[l:hl_group] = []
             endif
