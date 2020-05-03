@@ -55,3 +55,23 @@ hi default link LspCxxHlSymNamespace LspCxxHlGroupNamespace
 hi default link LspCxxHlSymVariable Normal
 hi default link LspCxxHlSymParameter Normal
 hi default link LspCxxHlSymField LspCxxHlGroupMemberVariable
+
+" clangd-only groups
+" A static member variable
+hi default link LspCxxHlSymUnknownStaticField Normal
+" Seems to be when a type alias refers to a primitive
+hi default link LspCxxHlSymPrimitive Type
+" Equivalent to TypeAlias
+hi default link LspCxxHlSymTypedef Type
+" Equivalent to TypeParameter
+hi default link LspCxxHlSymTemplateParameter Type
+" Equivalent to EnumMember
+hi default link LspCxxHlSymEnumConstant LspCxxHlGroupEnumConstant
+" A type dependent on a template
+" E.g. T::A, A would be a dependent type
+hi default link LspCxxHlSymDependentType Type
+" A name dependent on a template, usually a function but can also be a variable?
+hi default link LspCxxHlSymDependentName Function
+" C++20 concepts, maybe type is sufficient for now...
+hi default link LspCxxHlSymConcept Type
+
