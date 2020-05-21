@@ -146,6 +146,9 @@ g:lsp_cxx_hl_inactive_region_priority
 The match priority of preprocessor skipped regions. Also see |matchadd()|.
 This is very low to avoid the regions from overwriting other matches.
 
+Note: this has no effect in |neovim| when |g:lsp_cxx_hl_use_nvim_text_props|
+is |true|
+
 Default = -99.
 >
   let g:lsp_cxx_hl_inactive_region_priority = -10
@@ -158,6 +161,9 @@ g:lsp_cxx_hl_syntax_priority
 
 The match priority of general semantic highlight. Also see |matchadd()|.
 This is very low to avoid the highlighting from overwriting other matches.
+
+Note: this has no effect in |neovim| when |g:lsp_cxx_hl_use_nvim_text_props|
+is |true|
 
 Default = -100.
 >
@@ -208,6 +214,8 @@ Preprocessor Skipped Regions
 Preprocessor inactive regions are highlighted using |LspCxxHlSkippedRegion|.
 The first and last lines are highlighted using |LspCxxHlSkippedRegionBeginEnd|,
 this is because cquery/ccls includes the #if/#endif in the inactive region.
+
+Note: |LspCxxHlSkippedRegionBeginEnd| only applies when not using |textprop|
 
 Default Mapping
 |LspCxxHlSkippedRegion| -> |Comment|
