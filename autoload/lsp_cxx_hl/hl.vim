@@ -23,14 +23,12 @@ endfunction
 
 " Clear highlighting in this buffer
 function! lsp_cxx_hl#hl#clear() abort
-    if g:lsp_cxx_hl_use_nvim_text_props
-        let l:bufnr = winbufnr(0)
+    let l:bufnr = winbufnr(0)
 
+    if g:lsp_cxx_hl_use_nvim_text_props
         call lsp_cxx_hl#textprop_nvim#symbols#clear(l:bufnr)
         call lsp_cxx_hl#textprop_nvim#skipped#clear(l:bufnr)
     elseif g:lsp_cxx_hl_use_text_props
-        let l:bufnr = winbufnr(0)
-
         call lsp_cxx_hl#textprop#symbols#clear(l:bufnr)
         call lsp_cxx_hl#textprop#skipped#clear(l:bufnr)
     else
@@ -43,12 +41,14 @@ endfunction
 function! lsp_cxx_hl#hl#enable() abort
     unlet! b:lsp_cxx_hl_disabled
 
+    let l:bufnr = winbufnr(0)
+
     if g:lsp_cxx_hl_use_nvim_text_props
-        call lsp_cxx_hl#textprop_nvim#symbols#highlight()
-        call lsp_cxx_hl#textprop_nvim#skipped#highlight()
+        call lsp_cxx_hl#textprop_nvim#symbols#highlight(l:bufnr)
+        call lsp_cxx_hl#textprop_nvim#skipped#highlight(l:bufnr)
     elseif g:lsp_cxx_hl_use_text_props
-        call lsp_cxx_hl#textprop#symbols#highlight()
-        call lsp_cxx_hl#textprop#skipped#highlight()
+        call lsp_cxx_hl#textprop#symbols#highlight(l:bufnr)
+        call lsp_cxx_hl#textprop#skipped#highlight(l:bufnr)
     else
         call lsp_cxx_hl#hl#check(1)
     endif

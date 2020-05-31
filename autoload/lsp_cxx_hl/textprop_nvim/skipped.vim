@@ -15,16 +15,10 @@ function! lsp_cxx_hl#textprop_nvim#skipped#notify(bufnr, skipped) abort
     call lsp_cxx_hl#verbose_log('textprop nvim notify skipped regions ',
                 \ 'for ', bufname(a:bufnr))
 
-    let l:curbufnr = winbufnr(0)
-
-    if a:bufnr == l:curbufnr
-        call lsp_cxx_hl#textprop_nvim#skipped#highlight()
-    endif
+    call lsp_cxx_hl#textprop_nvim#skipped#highlight(a:bufnr)
 endfunction
 
-function! lsp_cxx_hl#textprop_nvim#skipped#highlight() abort
-    let l:bufnr = winbufnr(0)
-
+function! lsp_cxx_hl#textprop_nvim#skipped#highlight(bufnr) abort
     if s:has_timers
         if get(g:, 'lsp_cxx_hl_skipped_timer', -1) != -1
             call lsp_cxx_hl#verbose_log('stopped hl_skipped timer')
@@ -32,9 +26,9 @@ function! lsp_cxx_hl#textprop_nvim#skipped#highlight() abort
         endif
 
         let g:lsp_cxx_hl_skipped_timer = timer_start(10,
-                    \ function('s:hl_skipped_wrap', [l:bufnr]))
+                    \ function('s:hl_skipped_wrap', [a:bufnr]))
     else
-        call s:hl_skipped_wrap(l:bufnr, 0)
+        call s:hl_skipped_wrap(a:bufnr, 0)
     endif
 endfunction
 
@@ -64,19 +58,20 @@ function! s:hl_skipped(bufnr, timer) abort
     endif
 
     " No data yet
-    if !exists('b:lsp_cxx_hl_skipped')
+    let l:skipped = getbufvar(a:bufnr, 'lsp_cxx_hl_skipped', [])
+    if empty(l:skipped)
         return
     endif
 
     let l:ns_id = nvim_create_namespace('lsp_cxx_hl_skipped')
 
-    for l:range in b:lsp_cxx_hl_skipped 
+    for l:range in l:skipped
         call lsp_cxx_hl#textprop_nvim#buf_add_hl_skipped_range(a:bufnr,
                     \ l:ns_id, 'LspCxxHlSkippedRegion', l:range)
     endfor
 
     call lsp_cxx_hl#log('hl_skipped (textprop nvim) highlighted ',
-                \ len(b:lsp_cxx_hl_skipped),
+                \ len(l:skipped),
                 \ ' skipped preprocessor regions',
                 \ ' in file ', bufname(a:bufnr))
 endfunction

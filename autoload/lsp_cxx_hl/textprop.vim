@@ -22,8 +22,8 @@ function! lsp_cxx_hl#textprop#gen_prop_id() abort
     endif
 endfunction
 
-function! lsp_cxx_hl#textprop#lsrange2prop(range) abort
-    return s:range_to_matches(
+function! lsp_cxx_hl#textprop#lsrange2prop(buf, range) abort
+    return s:range_to_matches(a:buf,
                 \ a:range['start']['line'] + 1,
                 \ a:range['start']['character'] + 1,
                 \ a:range['end']['line'] + 1,
@@ -31,25 +31,13 @@ function! lsp_cxx_hl#textprop#lsrange2prop(range) abort
                 \ )
 endfunction
 
-function! lsp_cxx_hl#textprop#offsets2prop(offsets) abort
-    let l:s_byte = a:offsets['L'] + 1
-    let l:e_byte = a:offsets['R'] + 1
-    let l:s_line = byte2line(l:s_byte)
-    let l:e_line = byte2line(l:e_byte)
-
-    return s:range_to_matches(
-                \ l:s_line,
-                \ l:s_byte - line2byte(l:s_line) + 1,
-                \ l:e_line,
-                \ l:e_byte - line2byte(l:e_line) + 1
-                \ )
-endfunction
-
-function! s:range_to_matches(s_line, s_char, e_line, e_char) abort
+function! s:range_to_matches(buf, s_line, s_char, e_line, e_char) abort
     let l:prop_dict = { 'end_col': a:e_char }
 
+    let l:winnr = bufwinid(a:buf)
+
     let l:s_line = a:s_line < 1 ? 1 : a:s_line
-    let l:e_line = a:e_line > line('$') ? line('$') : a:e_line
+    let l:e_line = a:e_line > line('$', l:winnr) ? line('$', l:winnr) : a:e_line
 
     if l:s_line != l:e_line
         let l:prop_dict['end_lnum'] = l:e_line

@@ -18,16 +18,10 @@ function! lsp_cxx_hl#textprop#skipped#notify(bufnr, skipped) abort
     call lsp_cxx_hl#verbose_log('textprop notify skipped regions ',
                 \ 'for ', bufname(a:bufnr))
 
-    let l:curbufnr = winbufnr(0)
-
-    if a:bufnr == l:curbufnr
-        call lsp_cxx_hl#textprop#skipped#highlight()
-    endif
+    call lsp_cxx_hl#textprop#skipped#highlight(a:bufnr)
 endfunction
 
-function! lsp_cxx_hl#textprop#skipped#highlight() abort
-    let l:bufnr = winbufnr(0)
-
+function! lsp_cxx_hl#textprop#skipped#highlight(bufnr) abort
     if s:has_timers
         if get(g:, 'lsp_cxx_hl_skipped_timer', -1) != -1
             call lsp_cxx_hl#verbose_log('stopped hl_skipped timer')
@@ -35,9 +29,9 @@ function! lsp_cxx_hl#textprop#skipped#highlight() abort
         endif
 
         let g:lsp_cxx_hl_skipped_timer = timer_start(10,
-                    \ function('s:hl_skipped_wrap', [l:bufnr]))
+                    \ function('s:hl_skipped_wrap', [a:bufnr]))
     else
-        call s:hl_skipped_wrap(l:bufnr, 0)
+        call s:hl_skipped_wrap(a:bufnr, 0)
     endif
 endfunction
 
@@ -61,7 +55,7 @@ endfunction
 function! s:hl_skipped_wrap(bufnr, timer) abort
     let l:begintime = lsp_cxx_hl#profile_begin()
 
-    let l:old_id = get(b:, 'lsp_cxx_hl_skipped_id', -1)
+    let l:old_id = getbufvar(a:bufnr, 'lsp_cxx_hl_skipped_id', -1)
 
     call s:hl_skipped(a:bufnr, a:timer)
 
@@ -80,7 +74,8 @@ function! s:hl_skipped(bufnr, timer) abort
     endif
 
     " No data yet
-    if !exists('b:lsp_cxx_hl_skipped')
+    let l:skipped = getbufvar(a:bufnr, 'lsp_cxx_hl_skipped', [])
+    if empty(l:skipped)
         return
     endif
 
@@ -94,8 +89,8 @@ function! s:hl_skipped(bufnr, timer) abort
     endif
 
     let l:props = []
-    for l:range in b:lsp_cxx_hl_skipped 
-        let l:prop = lsp_cxx_hl#textprop#lsrange2prop(l:range)
+    for l:range in l:skipped
+        let l:prop = lsp_cxx_hl#textprop#lsrange2prop(a:bufnr, l:range)
 
         " Remove the beginnings and ends of the region
         " since it includes them (#if/#endifs)
@@ -134,9 +129,9 @@ function! s:hl_skipped(bufnr, timer) abort
         endtry
     endfor
 
-    let b:lsp_cxx_hl_skipped_id = l:prop_id
+    call setbufvar(a:bufnr, 'lsp_cxx_hl_skipped_id', l:prop_id)
 
-    call lsp_cxx_hl#log('hl_skipped (textprop) highlighted ', len(b:lsp_cxx_hl_skipped),
+    call lsp_cxx_hl#log('hl_skipped (textprop) highlighted ', len(l:skipped),
                 \ ' skipped preprocessor regions',
                 \ ' in file ', bufname(a:bufnr))
 endfunction

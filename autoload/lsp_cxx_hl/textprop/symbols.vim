@@ -17,7 +17,6 @@
 "   id for symbols
 
 let s:has_timers = has('timers')
-let s:has_byte_offset = has('byte_offset')
 
 function! lsp_cxx_hl#textprop#symbols#notify(bufnr, symbols) abort
     call setbufvar(a:bufnr, 'lsp_cxx_hl_symbols', a:symbols)
@@ -25,17 +24,11 @@ function! lsp_cxx_hl#textprop#symbols#notify(bufnr, symbols) abort
     call lsp_cxx_hl#verbose_log('textprop notify symbols ',
                 \ 'for ', bufname(a:bufnr))
 
-    let l:curbufnr = winbufnr(0)
-
-    if a:bufnr == l:curbufnr
-        call lsp_cxx_hl#textprop#symbols#highlight()
-    endif
+    call lsp_cxx_hl#textprop#symbols#highlight(a:bufnr)
 endfunction
 
 
-function! lsp_cxx_hl#textprop#symbols#highlight() abort
-    let l:bufnr = winbufnr(0)
-
+function! lsp_cxx_hl#textprop#symbols#highlight(bufnr) abort
     if s:has_timers
         if get(g:, 'lsp_cxx_hl_symbols_timer', -1) != -1
             call lsp_cxx_hl#verbose_log('stopped hl_symbols timer')
@@ -43,9 +36,9 @@ function! lsp_cxx_hl#textprop#symbols#highlight() abort
         endif
 
         let g:lsp_cxx_hl_symbols_timer = timer_start(10,
-                    \ function('s:hl_symbols_wrap', [l:bufnr]))
+                    \ function('s:hl_symbols_wrap', [a:bufnr]))
     else
-        call s:hl_symbols_wrap(l:bufnr, 0)
+        call s:hl_symbols_wrap(a:bufnr, 0)
     endif
 endfunction
 
@@ -69,7 +62,7 @@ endfunction
 function! s:hl_symbols_wrap(bufnr, timer) abort
     let l:begintime = lsp_cxx_hl#profile_begin()
 
-    let l:old_id = get(b:, 'lsp_cxx_hl_symbols_id', -1)
+    let l:old_id = getbufvar(a:bufnr,  'lsp_cxx_hl_symbols_id', -1)
 
     call s:hl_symbols(a:bufnr, a:timer)
 
@@ -89,7 +82,8 @@ function! s:hl_symbols(bufnr, timer) abort
     endif
 
     " No data yet
-    if !exists('b:lsp_cxx_hl_symbols')
+    let l:symbols = getbufvar(a:bufnr, 'lsp_cxx_hl_symbols', [])
+    if empty(l:symbols)
         return
     endif
 
@@ -100,7 +94,7 @@ function! s:hl_symbols(bufnr, timer) abort
 
     let l:byte_offset_warn_done = 0
 
-    for l:sym in b:lsp_cxx_hl_symbols
+    for l:sym in l:symbols
         " Create prop type
         let l:hl_group = 'LspCxxHlSym'
                     \ . l:sym['parentKind']
@@ -124,20 +118,16 @@ function! s:hl_symbols(bufnr, timer) abort
         let l:props = []
 
         for l:range in get(l:sym, 'ranges', [])
-            call add(l:props, lsp_cxx_hl#textprop#lsrange2prop(l:range))
+            call add(l:props, lsp_cxx_hl#textprop#lsrange2prop(a:bufnr, l:range))
         endfor
 
         let l:offsets = get(l:sym, 'offsets', [])
-        if s:has_byte_offset
-            for l:offset in l:offsets
-                call add(l:props, lsp_cxx_hl#textprop#offsets2prop(l:offset))
-            endfor
-        elseif !l:byte_offset_warn_done
+        if !empty(l:offsets) && !l:byte_offset_warn_done
             echohl ErrorMsg
-            echomsg 'Cannot highlight, +byte_offset required'
+            echomsg 'Error: ls ranges is not enabled in ccls'
             echohl NONE
 
-            call lsp_cxx_hl#log('Cannot highlight, +byte_offset required')
+            call lsp_cxx_hl#log('Error: ls ranges not enabled in ccls')
             
             let l:byte_offset_warn_done = 1
         endif
@@ -152,11 +142,12 @@ function! s:hl_symbols(bufnr, timer) abort
             continue
         endif
 
-        "call lsp_cxx_hl#log('props = ', l:props)
+        call lsp_cxx_hl#log('props = ', l:props)
         
         let l:prop_extra = {
                     \ 'id': l:prop_id,
-                    \ 'type': l:hl_group
+                    \ 'type': l:hl_group,
+                    \ 'bufnr': a:bufnr
                     \ }
 
         for l:prop in l:props
@@ -172,9 +163,9 @@ function! s:hl_symbols(bufnr, timer) abort
     endfor
 
     call lsp_cxx_hl#log('hl_symbols (textprop) highlighted ',
-                \ len(b:lsp_cxx_hl_symbols), ' symbols in file ',
+                \ len(l:symbols), ' symbols in file ',
                 \ bufname(a:bufnr))
 
-    let b:lsp_cxx_hl_symbols_id = l:prop_id
-    let b:lsp_cxx_hl_missing_groups = l:missing_groups
+    call setbufvar(a:bufnr, 'lsp_cxx_hl_symbols_id', l:prop_id)
+    call setbufvar(a:bufnr, 'lsp_cxx_hl_missing_groups', l:missing_groups)
 endfunction

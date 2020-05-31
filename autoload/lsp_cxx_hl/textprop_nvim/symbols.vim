@@ -11,7 +11,6 @@
 "   id for symbols
 
 let s:has_timers = has('timers')
-let s:has_byte_offset = has('byte_offset')
 
 function! lsp_cxx_hl#textprop_nvim#symbols#notify(bufnr, symbols) abort
     call setbufvar(a:bufnr, 'lsp_cxx_hl_symbols', a:symbols)
@@ -19,16 +18,11 @@ function! lsp_cxx_hl#textprop_nvim#symbols#notify(bufnr, symbols) abort
     call lsp_cxx_hl#verbose_log('textprop nvim notify symbols ',
                 \ 'for ', bufname(a:bufnr))
 
-    let l:curbufnr = winbufnr(0)
 
-    if a:bufnr == l:curbufnr
-        call lsp_cxx_hl#textprop_nvim#symbols#highlight()
-    endif
+    call lsp_cxx_hl#textprop_nvim#symbols#highlight(a:bufnr)
 endfunction
 
-function! lsp_cxx_hl#textprop_nvim#symbols#highlight() abort
-    let l:bufnr = winbufnr(0)
-
+function! lsp_cxx_hl#textprop_nvim#symbols#highlight(bufnr) abort
     if s:has_timers
         if get(g:, 'lsp_cxx_hl_symbols_timer', -1) != -1
             call lsp_cxx_hl#verbose_log('stopped hl_symbols timer')
@@ -36,9 +30,9 @@ function! lsp_cxx_hl#textprop_nvim#symbols#highlight() abort
         endif
 
         let g:lsp_cxx_hl_symbols_timer = timer_start(10,
-                    \ function('s:hl_symbols_wrap', [l:bufnr]))
+                    \ function('s:hl_symbols_wrap', [a:bufnr]))
     else
-        call s:hl_symbols_wrap(l:bufnr, 0)
+        call s:hl_symbols_wrap(a:bufnr, 0)
     endif
 endfunction
 
@@ -68,7 +62,8 @@ function! s:hl_symbols(bufnr, timer) abort
     endif
 
     " No data yet
-    if !exists('b:lsp_cxx_hl_symbols')
+    let l:symbols = getbufvar(a:bufnr, 'lsp_cxx_hl_symbols', [])
+    if empty(l:symbols)
         return
     endif
 
@@ -82,7 +77,7 @@ function! s:hl_symbols(bufnr, timer) abort
 
     let l:byte_offset_warn_done = 0
 
-    for l:sym in b:lsp_cxx_hl_symbols
+    for l:sym in l:symbols
         " Create prop type
         let l:hl_group = 'LspCxxHlSym'
                     \ . l:sym['parentKind']
@@ -117,25 +112,21 @@ function! s:hl_symbols(bufnr, timer) abort
                         \ l:hl_group_c, l:range)
         endfor
 
-        if s:has_byte_offset
-            for l:offset in get(l:sym, 'offsets', [])
-                call lsp_cxx_hl#textprop_nvim#buf_add_hl_offset(a:bufnr,
-                            \ l:ns_id, l:hl_group_c, l:offset)
-            endfor
-        elseif !l:byte_offset_warn_done
+        let l:offsets = get(l:sym, 'offsets', [])
+        if !empty(l:offsets) && !l:byte_offset_warn_done
             echohl ErrorMsg
-            echomsg 'Cannot highlight, +byte_offset required'
+            echomsg 'Error: ls ranges is not enabled in ccls'
             echohl NONE
 
-            call lsp_cxx_hl#log('Cannot highlight, +byte_offset required')
+            call lsp_cxx_hl#log('Error: ls ranges not enabled in ccls')
             
             let l:byte_offset_warn_done = 1
         endif
     endfor
 
     call lsp_cxx_hl#log('hl_symbols (textprop nvim) highlighted ',
-                \ len(b:lsp_cxx_hl_symbols), ' symbols in file ',
+                \ len(l:symbols), ' symbols in file ',
                 \ bufname(a:bufnr))
 
-    let b:lsp_cxx_hl_missing_groups = l:missing_groups
+    call setbufvar(a:bufnr, 'lsp_cxx_hl_missing_groups', l:missing_groups)
 endfunction
