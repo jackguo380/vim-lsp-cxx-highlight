@@ -53,7 +53,7 @@ endfunction
 
 function! s:hl_skipped(bufnr, timer) abort
     " Bad filetype
-    if count(g:lsp_cxx_hl_ft_whitelist, &filetype) == 0
+    if count(g:lsp_cxx_hl_ft_whitelist, getbufvar(a:bufnr, '&filetype')) == 0
         return
     endif
 

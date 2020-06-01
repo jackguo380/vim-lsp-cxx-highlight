@@ -34,13 +34,13 @@ endfunction
 function! lsp_cxx_hl#textprop_nvim#buf_add_hl_skipped_range(buf, ns_id, hl_group,
             \ range) abort
 
-    let l:winnr = bufwinid(a:buf)
-
     let l:s_line = a:range['start']['line']
     let l:s_line = l:s_line < 0 ? 0 : l:s_line
 
+    let l:buf_nl = nvim_buf_line_count(a:buf)
+
     let l:e_line = a:range['end']['line']
-    let l:e_line = l:e_line > line('$', l:winnr) - 1 ? line('$', l:winnr) - 1 : l:e_line
+    let l:e_line = l:e_line > l:buf_nl - 1 ? l:buf_nl - 1 : l:e_line
 
     if l:s_line + 1 <= l:e_line - 2
         for l:line in range(l:s_line + 1, l:e_line - 2)
