@@ -1,6 +1,6 @@
 # vim-lsp-cxx-highlight
 
-vim-lsp-cxx-highlight is a vim plugin that provides C/C++/ObjC semantic highlighting
+vim-lsp-cxx-highlight is a vim plugin that provides C/C++/Cuda/ObjC semantic highlighting
 using the language server protocol.
 
 ## Introduction
