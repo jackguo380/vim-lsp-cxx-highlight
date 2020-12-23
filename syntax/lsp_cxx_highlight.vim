@@ -23,9 +23,15 @@ hi default link LspCxxHlSkippedRegionBeginEnd Normal
 " Syntax Highlighting:
 "
 " Custom Highlight Groups
-hi default LspCxxHlGroupEnumConstant ctermfg=Magenta guifg=#AD7FA8 cterm=none gui=none
-hi default LspCxxHlGroupNamespace ctermfg=Yellow guifg=#BBBB00 cterm=none gui=none
-hi default LspCxxHlGroupMemberVariable ctermfg=White guifg=White
+if g:lsp_cxx_hl_light_bg
+    hi LspCxxHlGroupEnumConstant ctermfg=Magenta guifg=#573F54 cterm=none gui=none
+    hi LspCxxHlGroupNamespace ctermfg=Yellow guifg=#3D3D00 cterm=none gui=none
+    hi LspCxxHlGroupMemberVariable ctermfg=Black guifg=Black
+else
+    hi LspCxxHlGroupEnumConstant ctermfg=Magenta guifg=#AD7FA8 cterm=none gui=none
+    hi LspCxxHlGroupNamespace ctermfg=Yellow guifg=#BBBB00 cterm=none gui=none
+    hi LspCxxHlGroupMemberVariable ctermfg=White guifg=White
+endif
 
 hi default link LspCxxHlSymUnknown Normal
 

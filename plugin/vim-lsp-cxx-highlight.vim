@@ -22,6 +22,7 @@ let g:lsp_cxx_hl_use_nvim_text_props = get(g:,
             \ 'lsp_cxx_hl_use_nvim_text_props', has('nvim-0.3.0'))
 let g:lsp_cxx_hl_text_prop_refresh_count = get(g:,
             \ 'lsp_cxx_hl_text_prop_refresh_count', 10)
+let g:lsp_cxx_hl_light_bg = get(g:, 'lsp_cxx_hl_light_bg', 0)
 
 function s:initialize() abort
     let l:ok = 0

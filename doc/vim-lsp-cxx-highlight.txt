@@ -198,6 +198,18 @@ Default = 0.
   let g:lsp_cxx_hl_use_text_props = 1 
 <
 
+-------------------------------------------------------------------------------
+
+                    *lsp_cxx_hl_light_bg* *g:lsp_cxx_hl_light_bg*
+g:lsp_cxx_hl_light_bg 
+
+Use default colors that are suitable for a light background color.
+
+Default = 0.
+>
+  let g:lsp_cxx_hl_light_bg = 1 
+<
+
 ===============================================================================
 
                                        *vim-lsp-cxx-highlight-highlight-groups*
