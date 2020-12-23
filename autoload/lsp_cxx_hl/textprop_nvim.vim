@@ -27,8 +27,9 @@ function! s:buf_add_hl(buf, ns_id, hl_group,
         endif
     endif
 
-    call lsp_cxx_hl#log('Error (textprop_nvim): symbol spans multiple lines: ',
-                \ a:s_line, ' to ', a:e_line)
+    call lsp_cxx_hl#log('Error (textprop_nvim): symbol (', a:hl_group,
+                \ ') spans multiple lines: ', a:s_line, ':', a:s_char,
+                \ ' to ', a:e_line, ':', a:e_char)
 endfunction
 
 function! lsp_cxx_hl#textprop_nvim#buf_add_hl_skipped_range(buf, ns_id, hl_group,

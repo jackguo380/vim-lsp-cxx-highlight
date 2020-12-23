@@ -2,6 +2,10 @@
 " 
 " Variables:
 "
+" b:lsp_cxx_hl_symbols_cur_ns
+"   0 or 1 depending whether lsp_cxx_hl_symbols_<bufnr>_0 or
+"   lsp_cxx_hl_symbols_<bufnr>_1 is used to highlight
+"
 " b:lsp_cxx_hl_symbols
 "   ast symbol list from
 "   lsp_cxx_hl#notify_symbol_data
@@ -36,16 +40,30 @@ function! lsp_cxx_hl#textprop_nvim#symbols#highlight(bufnr) abort
     endif
 endfunction
 
+function! s:get_ns_id(bufnr) abort
+    let l:cur_ns = getbufvar(a:bufnr, 'lsp_cxx_hl_symbols_cur_ns', 0)
+
+    return nvim_create_namespace('lsp_cxx_hl_symbols_' . a:bufnr . '_' . l:cur_ns)
+endfunction
+
+function! s:toggle_ns_id(bufnr) abort
+    let l:cur_ns = getbufvar(a:bufnr, 'lsp_cxx_hl_symbols_cur_ns', 0)
+
+    if l:cur_ns == 0
+        call setbufvar(a:bufnr, 'lsp_cxx_hl_symbols_cur_ns', 1)
+    else
+        call setbufvar(a:bufnr, 'lsp_cxx_hl_symbols_cur_ns', 0)
+    endif
+endfunction
+
 function! lsp_cxx_hl#textprop_nvim#symbols#clear(bufnr) abort
-    let l:ns_id = nvim_create_namespace('lsp_cxx_hl_symbols')
+    let l:ns_id = s:get_ns_id(a:bufnr)
 
     call nvim_buf_clear_namespace(a:bufnr, l:ns_id, 0, -1)
 endfunction
 
 function! s:hl_symbols_wrap(bufnr, timer) abort
     let l:begintime = lsp_cxx_hl#profile_begin()
-
-    call lsp_cxx_hl#textprop_nvim#symbols#clear(a:bufnr)
 
     call s:hl_symbols(a:bufnr, a:timer)
 
@@ -67,7 +85,11 @@ function! s:hl_symbols(bufnr, timer) abort
         return
     endif
 
-    let l:ns_id = nvim_create_namespace('lsp_cxx_hl_symbols')
+    let l:old_ns_id = s:get_ns_id(a:bufnr)
+
+    call s:toggle_ns_id(a:bufnr)
+
+    let l:ns_id = s:get_ns_id(a:bufnr)
 
     " Cache results per session to ensure consistent highlighting
     " and reduce the number of times highlight groups are re resolved
@@ -129,4 +151,6 @@ function! s:hl_symbols(bufnr, timer) abort
                 \ bufname(a:bufnr))
 
     call setbufvar(a:bufnr, 'lsp_cxx_hl_missing_groups', l:missing_groups)
+
+    call nvim_buf_clear_namespace(a:bufnr, l:old_ns_id, 0, -1)
 endfunction

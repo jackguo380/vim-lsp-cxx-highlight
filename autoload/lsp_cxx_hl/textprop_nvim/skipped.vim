@@ -1,5 +1,9 @@
 " text properties implementation of preprocessor skipped regions
 "
+" b:lsp_cxx_hl_skipped_cur_ns
+"   0 or 1 depending whether lsp_cxx_hl_skipped_<bufnr>_0 or
+"   lsp_cxx_hl_skipped_<bufnr>_1 is used to highlight
+"
 " b:lsp_cxx_hl_skipped
 "   Skipped regions
 "
@@ -32,16 +36,30 @@ function! lsp_cxx_hl#textprop_nvim#skipped#highlight(bufnr) abort
     endif
 endfunction
 
+function! s:get_ns_id(bufnr) abort
+    let l:cur_ns = getbufvar(a:bufnr, 'lsp_cxx_hl_skipped_cur_ns', 0)
+
+    return nvim_create_namespace('lsp_cxx_hl_skipped_' . a:bufnr . '_' . l:cur_ns)
+endfunction
+
+function! s:toggle_ns_id(bufnr) abort
+    let l:cur_ns = getbufvar(a:bufnr, 'lsp_cxx_hl_skipped_cur_ns', 0)
+
+    if l:cur_ns == 0
+        call setbufvar(a:bufnr, 'lsp_cxx_hl_skipped_cur_ns', 1)
+    else
+        call setbufvar(a:bufnr, 'lsp_cxx_hl_skipped_cur_ns', 0)
+    endif
+endfunction
+
 function! lsp_cxx_hl#textprop_nvim#skipped#clear(bufnr) abort
-    let l:ns_id = nvim_create_namespace('lsp_cxx_hl_skipped')
+    let l:ns_id = s:get_ns_id(a:bufnr)
 
     call nvim_buf_clear_namespace(a:bufnr, l:ns_id, 0, -1)
 endfunction
 
 function! s:hl_skipped_wrap(bufnr, timer) abort
     let l:begintime = lsp_cxx_hl#profile_begin()
-
-    call lsp_cxx_hl#textprop_nvim#skipped#clear(a:bufnr)
 
     call s:hl_skipped(a:bufnr, a:timer)
 
@@ -63,7 +81,11 @@ function! s:hl_skipped(bufnr, timer) abort
         return
     endif
 
-    let l:ns_id = nvim_create_namespace('lsp_cxx_hl_skipped')
+    let l:old_ns_id = s:get_ns_id(a:bufnr)
+
+    call s:toggle_ns_id(a:bufnr)
+
+    let l:ns_id = s:get_ns_id(a:bufnr)
 
     for l:range in l:skipped
         call lsp_cxx_hl#textprop_nvim#buf_add_hl_skipped_range(a:bufnr,
@@ -74,4 +96,6 @@ function! s:hl_skipped(bufnr, timer) abort
                 \ len(l:skipped),
                 \ ' skipped preprocessor regions',
                 \ ' in file ', bufname(a:bufnr))
+
+    call nvim_buf_clear_namespace(a:bufnr, l:old_ns_id, 0, -1)
 endfunction
