@@ -42,8 +42,8 @@ function! lsp_cxx_hl#textprop_nvim#buf_add_hl_skipped_range(buf, ns_id, hl_group
     let l:e_line = a:range['end']['line']
     let l:e_line = l:e_line > l:buf_nl - 1 ? l:buf_nl - 1 : l:e_line
 
-    if l:s_line + 1 <= l:e_line - 2
-        for l:line in range(l:s_line + 1, l:e_line - 2)
+    if l:s_line + 1 <= l:e_line - 1
+        for l:line in range(l:s_line + 1, l:e_line - 1)
             call nvim_buf_add_highlight(a:buf, a:ns_id, a:hl_group,
                         \ l:line, 0, -1)
         endfor
