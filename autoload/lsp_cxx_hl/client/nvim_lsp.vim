@@ -15,19 +15,27 @@ endfunction
 
 function! s:doinit() abort
 lua <<EOF
-vim.lsp.callbacks['$cquery/publishSemanticHighlighting'] = function(err, method, params, client_id) 
+handlers = vim.lsp.handlers
+
+--[ backwards compatibility with neovim<0.5 --]
+if (handlers == nil)
+then
+  handlers = vim.lsp.callbacks
+end
+
+handlers['$cquery/publishSemanticHighlighting'] = function(err, method, params, client_id)
     vim.api.nvim_call_function('lsp_cxx_hl#client#nvim_lsp#cquery_hl', {params})
 end
 
-vim.lsp.callbacks['$cquery/setInactiveRegions'] = function(err, method, params, client_id)
+handlers['$cquery/setInactiveRegions'] = function(err, method, params, client_id)
     vim.api.nvim_call_function('lsp_cxx_hl#client#nvim_lsp#cquery_regions', {params})
 end
 
-vim.lsp.callbacks['$ccls/publishSemanticHighlight'] = function(err, method, params, client_id)
+handlers['$ccls/publishSemanticHighlight'] = function(err, method, params, client_id)
     vim.api.nvim_call_function('lsp_cxx_hl#client#nvim_lsp#ccls_hl', {params})
 end
 
-vim.lsp.callbacks['$ccls/publishSkippedRanges'] = function(err, method, params, client_id)
+handlers['$ccls/publishSkippedRanges'] = function(err, method, params, client_id)
     vim.api.nvim_call_function('lsp_cxx_hl#client#nvim_lsp#ccls_regions', {params})
 end
 EOF
