@@ -204,4 +204,4 @@ function! s:unescape_urlencode(str) abort
 
     call lsp_cxx_hl#verbose_log('unescape_urlencode unescaped filename: ', l:str)
     return l:str
-endfunction!
+endfunction
