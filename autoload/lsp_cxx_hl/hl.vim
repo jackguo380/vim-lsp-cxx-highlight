@@ -64,17 +64,13 @@ endfunction
 " Notify of new semantic highlighting symbols
 function! lsp_cxx_hl#hl#notify_symbols(bufnr, symbols) abort
     if g:lsp_cxx_hl_use_nvim_text_props
-        if len(a:symbols) == 0
-            call lsp_cxx_hl#textprop_nvim#symbols#clear(a:bufnr)
-        elseif get(b:, 'lsp_cxx_hl_disabled', 0)
+        if get(b:, 'lsp_cxx_hl_disabled', 0)
             call lsp_cxx_hl#hl#clear()
         else
             call lsp_cxx_hl#textprop_nvim#symbols#notify(a:bufnr, a:symbols)
         endif
     elseif g:lsp_cxx_hl_use_text_props
-        if len(a:symbols) == 0
-            call lsp_cxx_hl#textprop#symbols#clear(a:bufnr)
-        elseif get(b:, 'lsp_cxx_hl_disabled', 0)
+        if get(b:, 'lsp_cxx_hl_disabled', 0)
             call lsp_cxx_hl#hl#clear()
         else
             call lsp_cxx_hl#textprop#symbols#notify(a:bufnr, a:symbols)
@@ -93,17 +89,13 @@ endfunction
 " Notify of new preprocessor skipped regions
 function! lsp_cxx_hl#hl#notify_skipped(bufnr, skipped) abort
     if g:lsp_cxx_hl_use_nvim_text_props
-        if len(a:skipped) == 0
-            call lsp_cxx_hl#textprop_nvim#skipped#clear(a:bufnr)
-        elseif get(b:, 'lsp_cxx_hl_disabled', 0)
+        if get(b:, 'lsp_cxx_hl_disabled', 0)
             call lsp_cxx_hl#hl#clear()
         else
             call lsp_cxx_hl#textprop_nvim#skipped#notify(a:bufnr, a:skipped)
         endif
     elseif g:lsp_cxx_hl_use_text_props
-        if len(a:skipped) == 0
-            call lsp_cxx_hl#textprop#skipped#clear(a:bufnr)
-        elseif get(b:, 'lsp_cxx_hl_disabled', 0)
+        if get(b:, 'lsp_cxx_hl_disabled', 0)
             call lsp_cxx_hl#hl#clear()
         else
             call lsp_cxx_hl#textprop#skipped#notify(a:bufnr, a:skipped)
