@@ -61,6 +61,7 @@ hi default link LspCxxHlSymNamespace LspCxxHlGroupNamespace
 hi default link LspCxxHlSymVariable Normal
 hi default link LspCxxHlSymParameter Normal
 hi default link LspCxxHlSymField LspCxxHlGroupMemberVariable
+" LspCxxHlSymLocalVariable
 
 " clangd-only groups
 " A static member variable
