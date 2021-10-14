@@ -23,6 +23,28 @@ then
   handlers = vim.lsp.callbacks
 end
 
+local version = vim.version()
+if (version.major >= 0 and version.minor >= 5 and version.patch > 0)
+then
+
+handlers['$cquery/publishSemanticHighlighting'] = function(err, result, ctx)
+    vim.api.nvim_call_function('lsp_cxx_hl#client#nvim_lsp#cquery_hl', {result})
+end
+
+handlers['$cquery/setInactiveRegions'] = function(err, result, ctx)
+    vim.api.nvim_call_function('lsp_cxx_hl#client#nvim_lsp#cquery_regions', {result})
+end
+
+handlers['$ccls/publishSemanticHighlight'] = function(err, result, ctx)
+    vim.api.nvim_call_function('lsp_cxx_hl#client#nvim_lsp#ccls_hl', {result})
+end
+
+handlers['$ccls/publishSkippedRanges'] = function(err, result, ctx)
+    vim.api.nvim_call_function('lsp_cxx_hl#client#nvim_lsp#ccls_regions', {result})
+end
+
+else
+
 handlers['$cquery/publishSemanticHighlighting'] = function(err, method, params, client_id)
     vim.api.nvim_call_function('lsp_cxx_hl#client#nvim_lsp#cquery_hl', {params})
 end
@@ -37,6 +59,8 @@ end
 
 handlers['$ccls/publishSkippedRanges'] = function(err, method, params, client_id)
     vim.api.nvim_call_function('lsp_cxx_hl#client#nvim_lsp#ccls_regions', {params})
+end
+
 end
 EOF
 endfunction
