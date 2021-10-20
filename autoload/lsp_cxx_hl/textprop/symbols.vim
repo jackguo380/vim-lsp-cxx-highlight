@@ -142,8 +142,6 @@ function! s:hl_symbols(bufnr, timer) abort
             continue
         endif
 
-        call lsp_cxx_hl#log('props = ', l:props)
-        
         let l:prop_extra = {
                     \ 'id': l:prop_id,
                     \ 'type': l:hl_group,
