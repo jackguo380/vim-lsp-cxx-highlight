@@ -25,7 +25,7 @@ Left: No Plugin, Right: vim-lsp-cxx-highlight + ccls
 The plugin requires `vim` or `neovim`. For `vim` `+timers` and `+byte_offset` are
 recommended but not required.
 
-Additionally a compatible language server and language server client is required.
+Additionally, a compatible language server and language server client is required.
 
 The following language servers and protocol extensions are supported:
 
@@ -39,9 +39,10 @@ The following language servers and protocol extensions are supported:
 
 - **[clangd](https://clangd.llvm.org)**
   - **Requires** [coc.nvim](https://github.com/neoclide/coc.nvim) and [coc-clangd](https://github.com/clangd/coc-clangd)
-  - Using the proposed [Semantic Highlighting Protocol](microsoft/language-server-protocol#18)
-  - **IMPORTANT:** The latest versions of clangd (13+) are no longer compatible with vim-lsp-cxx-highlight
-    - There are have no plans to fix this, ever, instead please ask your LSP client to support Semantic Tokens
+  - Using the proposed [Semantic Highlighting Protocol](https://github.com/microsoft/language-server-protocol/issues/18)
+  - **IMPORTANT:** coc-clangd supports 2 implementaions: "semantic highlighting" (old, non-standard)
+  and "semantic tokens" (new, LSP standard). The latest versions of clangd (12+) require disabling
+  coc's semantic tokens to work; see below.
 
 The following language server clients are supported:
 
@@ -89,7 +90,8 @@ For `ccls` the following initializationOptions are needed:
 For `clangd` `coc-settings.json` must have:
 ```json
 {
-    "clangd.semanticHighlighting": true
+    "clangd.semanticHighlighting": true,
+    "coc.preferences.semanticTokensHighlights": false
 }
 ```
 
@@ -125,7 +127,7 @@ let g:lsp_cxx_hl_use_text_props = 1
 
 **Note:** This is now automatically enabled for vim version 8.2 or greater
 
-This is a experimental feature so it may be quite buggy, please file bug reports!
+This is a experimental feature, so it may be quite buggy. Please file bug reports!
 
 
 ## License
