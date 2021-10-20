@@ -210,6 +210,22 @@ Default = 0.
   let g:lsp_cxx_hl_light_bg = 1 
 <
 
+-------------------------------------------------------------------------------
+
+                    *lsp_cxx_hl_clear_delay_ms* *g:lsp_cxx_hl_clear_delay_ms*
+g:lsp_cxx_hl_clear_delay_ms
+
+Clear delay for the last remaining skipped region. This is a workaround for
+debouncing erratic empty ccls notifications that appear upon saving.
+
+Generally should be set to longer than it takes to compile the file or else
+highlighting will flash when saving.
+
+Default = 30000.
+>
+  let g:lsp_cxx_hl_clear_delay_ms = 10000
+<
+
 ===============================================================================
 
                                        *vim-lsp-cxx-highlight-highlight-groups*
