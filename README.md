@@ -39,7 +39,7 @@ The following language servers and protocol extensions are supported:
 
 - **[clangd](https://clangd.llvm.org)**
   - **Requires** [coc.nvim](https://github.com/neoclide/coc.nvim) and [coc-clangd](https://github.com/clangd/coc-clangd)
-  - Using the proposed [Semantic Highlighting Protocol](microsoft/language-server-protocol#18)
+  - Using the proposed [Semantic Highlighting Protocol](https://github.com/microsoft/language-server-protocol/issues/18)
   - **IMPORTANT:** The latest versions of clangd (12+) require disabling Semantic Tokens to work, see below.
 
 The following language server clients are supported:
