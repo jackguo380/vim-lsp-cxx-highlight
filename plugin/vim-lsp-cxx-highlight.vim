@@ -24,6 +24,9 @@ let g:lsp_cxx_hl_text_prop_refresh_count = get(g:,
             \ 'lsp_cxx_hl_text_prop_refresh_count', 10)
 let g:lsp_cxx_hl_light_bg = get(g:, 'lsp_cxx_hl_light_bg', 0)
 let g:lsp_cxx_hl_clear_delay_ms = get(g:, 'lsp_cxx_hl_clear_delay_ms', 30000)
+let g:lsp_cxx_hl_delay_ms = get(g:, 'lsp_cxx_hl_delay_ms', 10)
+let g:lsp_cxx_hl_use_mode_delay = get(g:, 'lsp_cxx_hl_use_mode_delay', 0)
+let g:lsp_cxx_hl_edit_delay_ms = get(g:, 'lsp_cxx_hl_edit_delay_ms', 1000)
 
 function s:initialize() abort
     let l:ok = 0

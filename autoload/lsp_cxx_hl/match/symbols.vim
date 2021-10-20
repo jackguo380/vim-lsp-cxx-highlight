@@ -77,7 +77,8 @@ function! s:dispatch(force) abort
             call timer_stop(g:lsp_cxx_hl_symbols_timer)
         endif
 
-        let g:lsp_cxx_hl_symbols_timer = timer_start(10,
+        let g:lsp_cxx_hl_symbols_timer = timer_start(g:lsp_cxx_hl_use_mode_delay ?
+                    \ lsp_cxx_hl#get_mode_delay() : g:lsp_cxx_hl_delay_ms,
                     \ function('s:hl_symbols_wrap', [a:force, winbufnr(0)]))
     else
         call s:hl_symbols_wrap(a:force, winbufnr(0), 0)

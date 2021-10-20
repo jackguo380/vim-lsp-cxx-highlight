@@ -137,6 +137,15 @@ function! lsp_cxx_hl#profile_end(begin, ...) abort
     endif
 endfunction
 
+function! lsp_cxx_hl#get_mode_delay() abort
+    let l:mode = mode()
+    if l:mode ==# 'i' || l:mode ==# 'R'
+        return g:lsp_cxx_hl_edit_delay_ms
+    else
+        return g:lsp_cxx_hl_delay_ms
+    endif
+endfunction
+
 " Section: Helpers
 
 function! s:common_notify_checks(server, buffer, data) abort
