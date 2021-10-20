@@ -15,8 +15,8 @@ let s:has_timers = has('timers')
 function! lsp_cxx_hl#textprop#skipped#notify(bufnr, skipped) abort
     call setbufvar(a:bufnr, 'lsp_cxx_hl_skipped', a:skipped)
 
-    call lsp_cxx_hl#verbose_log('textprop notify skipped regions ',
-                \ 'for ', bufname(a:bufnr))
+    call lsp_cxx_hl#verbose_log('textprop notify ', len(a:skipped),
+                \ ' skipped regions for ', bufname(a:bufnr))
 
     call lsp_cxx_hl#textprop#skipped#highlight(a:bufnr)
 endfunction

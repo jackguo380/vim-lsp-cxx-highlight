@@ -21,8 +21,8 @@ let s:has_timers = has('timers')
 function! lsp_cxx_hl#textprop#symbols#notify(bufnr, symbols) abort
     call setbufvar(a:bufnr, 'lsp_cxx_hl_symbols', a:symbols)
 
-    call lsp_cxx_hl#verbose_log('textprop notify symbols ',
-                \ 'for ', bufname(a:bufnr))
+    call lsp_cxx_hl#verbose_log('textprop notify ', len(a:symbols),
+                \ ' symbols for ', bufname(a:bufnr))
 
     call lsp_cxx_hl#textprop#symbols#highlight(a:bufnr)
 endfunction

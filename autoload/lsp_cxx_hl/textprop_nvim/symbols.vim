@@ -19,8 +19,8 @@ let s:has_timers = has('timers')
 function! lsp_cxx_hl#textprop_nvim#symbols#notify(bufnr, symbols) abort
     call setbufvar(a:bufnr, 'lsp_cxx_hl_symbols', a:symbols)
 
-    call lsp_cxx_hl#verbose_log('textprop nvim notify symbols ',
-                \ 'for ', bufname(a:bufnr))
+    call lsp_cxx_hl#verbose_log('textprop nvim notify ', len(a:symbols),
+                \' symbols for ', bufname(a:bufnr))
 
 
     call lsp_cxx_hl#textprop_nvim#symbols#highlight(a:bufnr)
