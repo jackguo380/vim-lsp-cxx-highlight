@@ -40,6 +40,8 @@ The following language servers and protocol extensions are supported:
 - **[clangd](https://clangd.llvm.org)**
   - **Requires** [coc.nvim](https://github.com/neoclide/coc.nvim) and [coc-clangd](https://github.com/clangd/coc-clangd)
   - Using the proposed [Semantic Highlighting Protocol](microsoft/language-server-protocol#18)
+  - **IMPORTANT:** The latest versions of clangd (13+) are no longer compatible with vim-lsp-cxx-highlight
+    - There are have no plans to fix this, ever, instead please ask your LSP client to support Semantic Tokens
 
 The following language server clients are supported:
 
