@@ -65,6 +65,11 @@ Plug 'neovim/nvim-lsp' " nvim-lsp
 
 Plug 'jackguo380/vim-lsp-cxx-highlight'
 ```
+Using vim8's native package manager (Run this command in a terminal)
+
+```bash
+git clone https://github.com/jackguo380/vim-lsp-cxx-highlight.git ~/.vim/pack/vendor/start/vim-lsp-cxx-highlight
+```
 
 For `cquery` the following initializationOptions are needed:
 ```json
