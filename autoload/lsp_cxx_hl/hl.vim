@@ -160,7 +160,7 @@ function! s:stop_clear(bufnr, timer_var) abort
 endfunction
 
 function! s:clear_timer_fn(bufnr, timer_var, ClearFn, timer) abort
-    call lsp_cxx_hl#verbose_log(a:timer_var, ' clear_timer_fn ', l:timer)
+    call lsp_cxx_hl#verbose_log(a:timer_var, ' clear_timer_fn ', a:timer)
     call a:ClearFn(a:bufnr)
     call setbufvar(a:bufnr, a:timer_var, -1)
 endfunction
