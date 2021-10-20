@@ -62,12 +62,7 @@ endfunction
 function! s:hl_symbols_wrap(bufnr, timer) abort
     let l:begintime = lsp_cxx_hl#profile_begin()
 
-    let l:old_id = getbufvar(a:bufnr,  'lsp_cxx_hl_symbols_id', -1)
-
     call s:hl_symbols(a:bufnr, a:timer)
-
-    " Clear old highlighting after finishing highlighting
-    call lsp_cxx_hl#textprop#symbols#clear(a:bufnr, l:old_id)
 
     unlet! g:lsp_cxx_hl_symbols_timer
 
@@ -87,7 +82,11 @@ function! s:hl_symbols(bufnr, timer) abort
         return
     endif
 
+    let l:old_id = getbufvar(a:bufnr,  'lsp_cxx_hl_symbols_id', -1)
+
     let l:prop_id = lsp_cxx_hl#textprop#gen_prop_id()
+
+    call lsp_cxx_hl#log('hl_symbols (textprop) id ', l:prop_id)
 
     let l:hl_group_positions = {}
     let l:missing_groups = {}
@@ -166,4 +165,7 @@ function! s:hl_symbols(bufnr, timer) abort
 
     call setbufvar(a:bufnr, 'lsp_cxx_hl_symbols_id', l:prop_id)
     call setbufvar(a:bufnr, 'lsp_cxx_hl_missing_groups', l:missing_groups)
+
+    " Clear old highlighting after finishing highlighting
+    call lsp_cxx_hl#textprop#symbols#clear(a:bufnr, l:old_id)
 endfunction

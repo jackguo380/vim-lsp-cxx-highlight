@@ -55,12 +55,7 @@ endfunction
 function! s:hl_skipped_wrap(bufnr, timer) abort
     let l:begintime = lsp_cxx_hl#profile_begin()
 
-    let l:old_id = getbufvar(a:bufnr, 'lsp_cxx_hl_skipped_id', -1)
-
     call s:hl_skipped(a:bufnr, a:timer)
-
-    " Clear old highlighting after finishing highlighting
-    call lsp_cxx_hl#textprop#skipped#clear(a:bufnr, l:old_id)
 
     unlet! g:lsp_cxx_hl_skipped_timer
 
@@ -111,7 +106,11 @@ function! s:hl_skipped(bufnr, timer) abort
         call add(l:props, l:prop)
     endfor
 
+    let l:old_id = getbufvar(a:bufnr, 'lsp_cxx_hl_skipped_id', -1)
+
     let l:prop_id = lsp_cxx_hl#textprop#gen_prop_id()
+
+    call lsp_cxx_hl#log('hl_skipped (textprop) id ', l:prop_id)
 
     let l:prop_extra = {
                 \ 'id': l:prop_id,
@@ -134,4 +133,7 @@ function! s:hl_skipped(bufnr, timer) abort
     call lsp_cxx_hl#log('hl_skipped (textprop) highlighted ', len(l:skipped),
                 \ ' skipped preprocessor regions',
                 \ ' in file ', bufname(a:bufnr))
+
+    " Clear old highlighting after finishing highlighting
+    call lsp_cxx_hl#textprop#skipped#clear(a:bufnr, l:old_id)
 endfunction
