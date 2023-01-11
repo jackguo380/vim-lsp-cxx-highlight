@@ -149,6 +149,9 @@ function! s:hl_symbols(bufnr, timer) abort
 
         for l:prop in l:props
             call extend(l:prop[2], l:prop_extra)
+            let [ l:prop[1], l:prop[2]['end_col'] ] = lsp_cxx_hl#bytes_to_columns(
+                        \ a:bufnr, l:prop[0], l:prop[1],
+                        \ get(l:prop[2], 'end_lnum', l:prop[0]), l:prop[2]['end_col'])
 
             try
                 call prop_add(l:prop[0], l:prop[1], l:prop[2])

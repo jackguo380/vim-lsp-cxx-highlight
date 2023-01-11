@@ -1,5 +1,5 @@
 " Textprops neovim
-" 
+"
 " It should be noted that neovim uses zero based indexing like LSP
 " this is unlike regular vim APIs which are 1 based.
 
@@ -18,13 +18,16 @@ function! s:buf_add_hl(buf, ns_id, hl_group,
 
     " single line symbol
     if a:s_line == a:e_line
-        if a:e_char - a:s_char > 0
-            call nvim_buf_add_highlight(a:buf, a:ns_id, a:hl_group,
-                        \ a:s_line, a:s_char, a:e_char)
-            return
-        else
-            return
+        let [ s_char, e_char ] = lsp_cxx_hl#bytes_to_columns(a:buf,
+                    \ a:s_line + 1, a:s_char, a:s_line + 1, a:e_char)
+        if s_char < e_char
+            try
+                call nvim_buf_add_highlight(a:buf, a:ns_id, a:hl_group,
+                            \ a:s_line, s_char, e_char)
+            catch /Column value outside range/
+            endtry
         endif
+        return
     endif
 
     call lsp_cxx_hl#log('Error (textprop_nvim): symbol (', a:hl_group,
