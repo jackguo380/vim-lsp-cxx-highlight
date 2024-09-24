@@ -163,6 +163,24 @@ function! s:common_notify_checks(server, buffer, data) abort
     return l:bufnr
 endfunction
 
+" Convert range of bytes starting from s_line character s_char
+" to line e_line character e_char in buffer a:buf into a range of columns.
+" These are equal when each displayed character takes exactly one column,
+" but there's also UTF-8.
+function! lsp_cxx_hl#bytes_to_columns(buf, s_line, s_char, e_line, e_char)
+    if get(g:, 'lsp_cxx_hl_use_byteidx', 0)
+        try
+            return [byteidx(getbufline(a:buf, a:s_line)[0], a:s_char),
+                  \ byteidx(getbufline(a:buf, a:e_line)[0], a:e_char)]
+        " If the user fastly edits the file, this can be slower then the
+        " edits, and `getbufline` can return zero lines or these columns
+        " may just not exists anymore.
+        catch /^Vim\%((\a\+)\)\=:E684/
+        endtry
+    endif
+    return [ a:s_char, a:e_char ]
+endfunction
+
 " Section: Misc Helpers
 function! s:uri2bufnr(uri) abort
     " Absolute paths on windows has 3 leading /
