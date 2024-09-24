@@ -3,6 +3,17 @@
 vim-lsp-cxx-highlight is a vim plugin that provides C/C++/Cuda/ObjC semantic highlighting
 using the language server protocol.
 
+## Archive Notice
+
+This project has been archived as it is no longer needed to achieve highlighting
+as most LSP servers and clients now support Semantic Tokens.
+
+The original purpose of this project was to bring good semantic highlighting to vim/nvim
+for C++ well before it was standardized by parsing non-standard extensions from cquery and ccls.
+
+It makes more sense for a LSP client (builtin or a separate plugin) to implement the highlighting
+as it is standardized now.
+
 ## Introduction
 
 How does this plugin differentiate itself from
